@@ -57,3 +57,13 @@ Strings live in `packages/i18n/src/locales/<lang>/<namespace>.json`; `en` is the
 ## Pull requests
 
 Open PRs against `preview`. New `.py`, `.ts` and `.tsx` files need the `COPYRIGHT.txt` header (checked in CI, see `COPYRIGHT_CHECK.md`).
+
+## Plane 项目（本 fork 的补充约定）
+
+> 以下是 `yuemingist/plane` fork 的项目约定，**不属于上游内容**；同步上游时请保留本节。上文的开发规范（命令、代码风格、迁移、测试）照常适用。
+
+- **先读**：`docs/项目管理/07.项目记忆.md`（稳定事实、决策索引、待确认）→ `08.工作约定.md`（git、提交、凭据、何时问明哥）→ `09.角色与分工.md`。
+- **技能**：`.claude/skills/plane-resume`（开工恢复）、`plane-wrapup`（收工写回）、`plane-brief`（写任务书与验收）。
+- **红线**：调研阶段 `main` 直推；开发阶段按任务开分支，**合并回 `main` 前必须问明哥**；`preview` 只同步上游、不在其上改；同步上游由明哥决定。
+- **例外**：上文 “Pull requests: Open PRs against `preview`” 不适用本 fork（默认不向上游提 PR）。
+- 测试账号见 `docs/运维/测试账号.md`；真实生产凭据只放 Vault，不入库。
