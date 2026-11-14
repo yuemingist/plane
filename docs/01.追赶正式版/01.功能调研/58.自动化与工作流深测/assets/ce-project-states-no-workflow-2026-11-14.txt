@@ -1,0 +1,55 @@
+ 
+  [region] Notifications
+              [button] 打开工作空间切换器
+                  [img] Demo Workspace
+                    DW
+                  Demo Workspace
+                [input:text] Search commands...
+          [link] 收件箱
+          [button] 帮助
+            [button] 在GitHub上为我们加星
+              在GitHub上为我们加星
+            [button] 在GitHub上为我们加星
+            [button] 打开用户菜单
+              [img] yueming
+                Y
+                    [button] Toggle settings menu
+                    状态
+                    [button] Back to project
+                    Project settings
+                    Web Platform
+                    管理员
+                    常规
+                    [toolbar] 常规
+                    常规
+                    成员
+                    功能
+                    [toolbar] 功能
+                    周期
+                    模块
+                    视图
+                    页面
+                    接收
+                    Work structure
+                    [toolbar] Work structure
+                    状态
+                    标签
+                    估算
+                    Execution
+                    [toolbar] Execution
+                    自动化
+                    面包屑导航
+                    状态
+                    状态
+                    定义和自定义工作流状态以跟踪工作项的进度。
+                    文档
+                    backlog
+                    [button] 添加
+                    unstarted
+                    [button] 添加
+                    started
+                    [button] 添加
+                    completed
+                    [button] 添加
+                    cancelled
+                    [button] 添加

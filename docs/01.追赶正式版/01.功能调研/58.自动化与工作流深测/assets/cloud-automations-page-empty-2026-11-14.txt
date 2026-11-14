@@ -1,0 +1,106 @@
+              [button] 打开工作空间切换器
+                  [img] YM Research
+                    YR
+                  YM Research
+                [input:text] Search
+                    Search your workspace
+                    Start typing to search across work items, projects, cycles, modules and more
+            开始使用
+          [button] 收件箱
+          [button] 帮助
+            [button] 打开用户菜单
+              [img] yueming0624
+                Y
+                [link] Work
+                  Work
+                [link] Wiki
+                  Wiki
+                [link] AI
+                  AI
+                [link] 设置
+                  设置
+                    [button] 您的 Sticky
+                    [button] 所有 Sticky
+                    [button] 添加 Sticky
+                    [button] 切换侧边栏
+                    自动化
+                    [complementary] 项目设置侧边栏
+                    [button] 返回 Plane
+                    项目设置
+                    [button] 切换侧边栏
+                    [button] 项目, 调研-时间跟踪
+                    🎓
+                    调研-时间跟踪
+                    Admin
+                    搜索设置
+                    [combobox] 搜索设置
+                    项目设置
+                    [link] 常规
+                    常规
+                    [link] 成员
+                    成员
+                    [link] 工作日志
+                    工作日志
+                    功能
+                    [link] 周期
+                    周期
+                    [link] 模块
+                    模块
+                    [link] 视图
+                    视图
+                    [link] 页面
+                    页面
+                    [link] Intake
+                    Intake
+                    [link] 时间跟踪
+                    时间跟踪
+                    [link] 里程碑
+                    里程碑
+                    [link] 项目更新
+                    项目更新
+                    [link] 发布
+                    发布
+                    [link] 记忆
+                    记忆
+                    工作结构
+                    [link] 工作项类型
+                    工作项类型
+                    [link] 状态
+                    状态
+                    [link] 工作流
+                    工作流
+                    [link] 标签
+                    标签
+                    [link] 估算
+                    估算
+                    [link] 模板
+                    模板
+                    自动化
+                    [link] 自动化
+                    自动化
+                    [link] 重复工作项
+                    重复工作项
+                    [slider] Resize sidebar
+                    面包屑导航
+                    自动化
+                    自动化工作项上的常规操作，让团队无需手动处理。
+                    文档
+                    工作项在完成后或取消后自动归档。
+                    [switch] 自动归档已关闭的工作项
+                    <input value="on">
+                    自动归档已关闭
+                    在一段时间无活动后自动关闭工作项。
+                    [switch] 自动关闭工作项
+                    <input value="on">
+                    自动关闭不活跃
+                    自动关闭状态
+                    在工作项到期前，通过电子邮件和应用内通知提醒受理人。
+                    [switch] 自动提醒
+                    <input value="on">
+                    提前提醒
+                    自定义自动化
+                    还没有自动化可显示。
+                    自动化通过设置触发器、条件和操作来帮助您消除重复性任务。创建一个来节省时间并让工作轻松进行。
+                    创建自动化
+  [region] Notifications
+ 

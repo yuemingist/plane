@@ -1,0 +1,148 @@
+ 
+  [region] Notifications
+              [button] 打开工作空间切换器
+                  [img] Demo Workspace
+                    DW
+                  Demo Workspace
+                [input:text] Search commands...
+          [link] 收件箱
+          [button] 帮助
+            [button] 在GitHub上为我们加星
+              在GitHub上为我们加星
+            [button] 在GitHub上为我们加星
+            [button] 打开用户菜单
+              [img] yueming
+                Y
+              [complementary] 主侧边栏
+                    Projects
+                    [button] 自定义导航
+                    [button] 折叠侧边栏
+                    新工作项
+                    首页
+                    草稿
+                    我的工作
+                    便签
+                    工作区
+                    项目
+                    [button] 打开扩展侧边栏
+                    更多
+                    项目
+                    [button] 创建新项目
+                    [button] 拖动以重新排列
+                    Design System
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    [button] 拖动以重新排列
+                    Mobile App
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    [button] 拖动以重新排列
+                    Web Platform
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    [button] 打开付费计划模态框
+                    Community
+                  [separator] 调整侧边栏大小
+              [complementary] 侧边栏预览
+                    Projects
+                    [button] 自定义导航
+                    [button] 折叠侧边栏
+                    新工作项
+                    首页
+                    草稿
+                    我的工作
+                    便签
+                    工作区
+                    项目
+                    [button] 打开扩展侧边栏
+                    更多
+                    项目
+                    [button] 创建新项目
+                    [button] 拖动以重新排列
+                    Design System
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    [button] 拖动以重新排列
+                    Mobile App
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    [button] 拖动以重新排列
+                    Web Platform
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    [button] 打开付费计划模态框
+                    Community
+                  [separator] 调整侧边栏大小
+                    [button] 拖动以重新排列
+                    视图
+                    [button] 置顶
+                    [button] 拖动以重新排列
+                    分析
+                    [button] 置顶
+                    [button] 拖动以重新排列
+                    归档
+                    [button] 置顶
+                    项目
+                    [button] 创建项目
+                    [input:text] 搜索
+                    [toolbar] 项目
+                    [button] 拖动以重新排列
+                    Design System
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    [button] 拖动以重新排列
+                    Mobile App
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    [button] 拖动以重新排列
+                    Web Platform
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    面包屑导航
+                    分析
+                    概览
+                    工作项
+                    All projects
+                    概览
+                    用户总数
+                    4
+                    管理员总数
+                    1
+                    成员总数
+                    3
+                    访客总数
+                    0
+                    项目总数
+                    3
+                    工作项总数
+                    28
+                    周期总数
+                    2
+                    收集总数
+                    2
+                    项目洞察
+                    项目概览
+                    所有项目
+                    图表趋势
+                    工作项
+                    Work Items
+                    28
+                    Cycles
+                    2
+                    Modules
+                    3
+                    Intake
+                    2
+                    Members
+                    4
+                    Pages
+                    3
+                    Views
+                    1
+                    活跃项目
+                    Design System
+                    17%
+                    Mobile App
+                    13%
+                    Web Platform
+                    14%

@@ -1,0 +1,95 @@
+              [button] 打开工作空间切换器
+                  [img] YM Research
+                    YR
+                  YM Research
+                [input:text] Search
+                    Search your workspace
+                    Start typing to search across work items, projects, cycles, modules and more
+            开始使用
+          [button] 收件箱
+          [button] 帮助
+            [button] 打开用户菜单
+              [img] yueming0624
+                Y
+                [link] Work
+                  Work
+                [link] Wiki
+                  Wiki
+                [link] AI
+                  AI
+                [link] 设置
+                  设置
+                    [button] 您的 Sticky
+                    [button] 所有 Sticky
+                    [button] 添加 Sticky
+                    [button] 切换侧边栏
+                    重复工作项
+                    [complementary] 项目设置侧边栏
+                    [button] 返回 Plane
+                    项目设置
+                    [button] 切换侧边栏
+                    [button] 项目, 调研-时间跟踪
+                    🎓
+                    调研-时间跟踪
+                    Admin
+                    搜索设置
+                    [combobox] 搜索设置
+                    项目设置
+                    [link] 常规
+                    常规
+                    [link] 成员
+                    成员
+                    [link] 工作日志
+                    工作日志
+                    功能
+                    [link] 周期
+                    周期
+                    [link] 模块
+                    模块
+                    [link] 视图
+                    视图
+                    [link] 页面
+                    页面
+                    [link] Intake
+                    Intake
+                    [link] 时间跟踪
+                    时间跟踪
+                    [link] 里程碑
+                    里程碑
+                    [link] 项目更新
+                    项目更新
+                    [link] 发布
+                    发布
+                    [link] 记忆
+                    记忆
+                    工作结构
+                    [link] 工作项类型
+                    工作项类型
+                    [link] 状态
+                    状态
+                    [link] 工作流
+                    工作流
+                    [link] 标签
+                    标签
+                    [link] 估算
+                    估算
+                    [link] 模板
+                    模板
+                    自动化
+                    [link] 自动化
+                    自动化
+                    [link] 重复工作项
+                    重复工作项
+                    [slider] Resize sidebar
+                    面包屑导航
+                    重复工作项
+                    按重复计划自动创建工作项——适用于站会、报告或任何常规事项。
+                    文档
+                    暂无循环工作项
+                    按重复计划自动创建工作项——适用于站会、报告或任何常规事项。
+                    创建您的第一个重复工作项
+  [region] Notifications
+ 
+Pylon Chat Widget
+          Customer support window
+          Open customer support

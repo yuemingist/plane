@@ -1,0 +1,146 @@
+              [button] 打开工作空间切换器
+                  [img] YM Research
+                    YR
+                  YM Research
+                [input:text] Search
+                    Search your workspace
+                    Start typing to search across work items, projects, cycles, modules and more
+            开始使用
+          [button] 收件箱
+          [button] 帮助
+            [button] 打开用户菜单
+              [img] yueming0624
+                Y
+                [link] Work
+                  Work
+                [link] Wiki
+                  Wiki
+                [link] AI
+                  AI
+                [link] 设置
+                  设置
+                    [button] 您的 Sticky
+                    [button] 所有 Sticky
+                    [button] 添加 Sticky
+              [complementary] Main sidebar
+                    Work
+                    [button] 自定义导航
+                    [button] 切换侧边栏
+                    新工作项
+                    [toolbar] 工作区
+                    首页
+                    草稿
+                    我的工作
+                    Stickies
+                    工作区
+                    [toolbar] 工作区
+                    项目
+                    仪表板
+                    [button] aria_labels.app_sidebar.open_extended_sidebar
+                    更多
+                    项目
+                    [button] 创建项目
+                    [toolbar] 项目
+                    🎓
+                    调研-时间跟踪
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    👇
+                    thinkym
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    Try
+                    [toolbar] Try
+                    Connect to GitHub
+                    [button] 隐藏 Connect to GitHub
+                    Connect to Slack
+                    [button] 隐藏 Connect to Slack
+                    [button] Dismiss tip
+                    Download Plane for mobile
+                    Manage your work on the go. Download Plane on Play Store and App Store.
+                    Business trial ends
+            in 13d
+                  [slider] Resize sidebar
+              [complementary] Sidebar peek view
+                    Work
+                    [button] 自定义导航
+                    [button] 切换侧边栏
+                    新工作项
+                    [toolbar] 工作区
+                    首页
+                    草稿
+                    我的工作
+                    Stickies
+                    工作区
+                    [toolbar] 工作区
+                    项目
+                    仪表板
+                    [button] aria_labels.app_sidebar.open_extended_sidebar
+                    更多
+                    项目
+                    [button] 创建项目
+                    [toolbar] 项目
+                    🎓
+                    调研-时间跟踪
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    👇
+                    thinkym
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    Try
+                    [toolbar] Try
+                    Connect to GitHub
+                    [button] 隐藏 Connect to GitHub
+                    Connect to Slack
+                    [button] 隐藏 Connect to Slack
+                    [button] Dismiss tip
+                    Download Plane for mobile
+                    Manage your work on the go. Download Plane on Play Store and App Store.
+                    Business trial ends
+            in 13d
+                  [slider] Resize sidebar
+                [toolbar] 工作区
+                    [button] 拖动以重新排列
+                    视图
+                    [button] 置顶
+                    [button] 拖动以重新排列
+                    周期
+                    [button] 置顶
+                    [button] 拖动以重新排列
+                    分析
+                    [button] 置顶
+                    [button] 拖动以重新排列
+                    归档
+                    [button] 置顶
+                    [button] 拖动以重新排列
+                    仪表板
+                    [button] 置顶
+                    Projects
+                    [input:text] 搜索
+                    [toolbar] 项目
+                    🎓
+                    调研-时间跟踪
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    👇
+                    thinkym
+                    [button] 切换快速操作菜单
+                    [button] 打开项目菜单
+                    [button] 切换侧边栏
+                    面包屑导航
+                    Dashboards
+                    [button] 搜索
+                    [searchbox] 搜索
+                    [button] 清除
+                    添加仪表板
+                    公开
+                    私有
+                    共享
+                    暂无公开仪表板
+                    公开仪表板对工作空间中的所有人可见。创建一个，与您的团队共享指标和报告。
+  [region] Notifications
+ 
+Pylon Chat Widget
+          Customer support window
+          Open customer support

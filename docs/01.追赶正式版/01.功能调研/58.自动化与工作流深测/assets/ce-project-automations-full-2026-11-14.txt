@@ -1,0 +1,58 @@
+ 
+  [region] Notifications
+              [button] 打开工作空间切换器
+                  [img] Demo Workspace
+                    DW
+                  Demo Workspace
+                [input:text] Search commands...
+          [link] 收件箱
+          [button] 帮助
+            [button] 在GitHub上为我们加星
+              在GitHub上为我们加星
+            [button] 在GitHub上为我们加星
+            [button] 打开用户菜单
+              [img] yueming
+                Y
+                    [button] Toggle settings menu
+                    自动化
+                    [button] Back to project
+                    Project settings
+                    Web Platform
+                    管理员
+                    常规
+                    [toolbar] 常规
+                    常规
+                    成员
+                    功能
+                    [toolbar] 功能
+                    周期
+                    模块
+                    视图
+                    页面
+                    接收
+                    Work structure
+                    [toolbar] Work structure
+                    状态
+                    标签
+                    估算
+                    Execution
+                    [toolbar] Execution
+                    自动化
+                    面包屑导航
+                    自动化
+                    自动化
+                    配置自动化操作以简化项目管理工作流并减少手动任务。
+                    自动归档已关闭的工作项
+                    Plane 将自动归档已完成或已取消的工作项。
+                    [switch] 自动归档已关闭的工作项
+                    <input value="on">
+                    自动归档已关闭
+                    [button] 0 个月
+                    自动关闭工作项
+                    Plane 将自动关闭尚未完成或取消的工作项。
+                    [switch] 自动关闭工作项
+                    <input value="on">
+                    自动关闭不活跃
+                    [button] 0 个月
+                    自动关闭状态
+                    [button] 状态, Cancelled
