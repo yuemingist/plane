@@ -64,6 +64,6 @@ Open PRs against `preview`. New `.py`, `.ts` and `.tsx` files need the `COPYRIGH
 
 - **先读**：`docs/项目管理/07.项目记忆.md`（稳定事实、决策索引、待确认）→ `08.工作约定.md`（git、提交、凭据、何时问明哥）→ `09.角色与分工.md`。
 - **技能**：`.claude/skills/plane-resume`（开工恢复）、`plane-wrapup`（收工写回）、`plane-brief`（写任务书与验收）。
-- **红线**：调研阶段 `main` 直推；开发阶段按任务开分支，**合并回 `main` 前必须问明哥**；`preview` 只同步上游、不在其上改；同步上游由明哥决定。
+- **红线**：文档与方案阶段由统筹在 `main` 提交推送；编码阶段按任务开分支，**合并回 `main` 前必须问明哥**；`preview` 只同步上游、不在其上改；同步上游由明哥决定。
 - **例外**：上文 “Pull requests: Open PRs against `preview`” 不适用本 fork（默认不向上游提 PR）。
 - 测试账号见 `docs/运维/测试账号.md`；真实生产凭据只放 Vault，不入库。
