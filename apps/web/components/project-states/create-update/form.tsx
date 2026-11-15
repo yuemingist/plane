@@ -43,7 +43,9 @@ export function StateForm(props: TStateForm) {
   const [errors, setErrors] = useState<Partial<Record<keyof IState, string>> | undefined>(undefined);
 
   useEffect(() => {
-    if (data && !formData) setFromData(data);
+    // snapshot the incoming data once: `data` may be a mobx observable whose fields resolve
+    // asynchronously, so a shallow copy guarantees the controlled inputs pre-fill correctly (D6)
+    if (data && !formData) setFromData({ ...data });
   }, [data, formData]);
 
   const handleFormData = <T extends keyof IState>(key: T, value: IState[T]) => {
@@ -101,10 +103,11 @@ export function StateForm(props: TStateForm) {
               type="text"
               name="name"
               aria-label={t("name")}
-              placeholder="Name"
+              placeholder={t("project_settings.states.state_name_placeholder")}
               value={formData?.name}
               onChange={(e) => handleFormData("name", e.target.value)}
               maxLength={100}
+              // eslint-disable-next-line jsx-a11y/no-autofocus -- 打开弹窗自动聚焦名称输入，与正式版交互一致
               autoFocus
               error={errors?.name || undefined}
             />
@@ -132,17 +135,18 @@ export function StateForm(props: TStateForm) {
           variant="secondary"
           size="md"
           stretch="auto"
-          label="Cancel"
+          label={t("common.cancel")}
           disabled={buttonDisabled}
           onClick={onCancel}
         />
+        {/* the primary action stays disabled until the name is filled in, matching the cloud behavior (D7) */}
         <Button
           variant="primary"
           size="md"
           stretch="auto"
           label={buttonTitle}
           onClick={formSubmit}
-          disabled={buttonDisabled}
+          disabled={buttonDisabled || !formData?.name?.trim()}
         />
       </div>
     </div>
