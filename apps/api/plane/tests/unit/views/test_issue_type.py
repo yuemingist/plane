@@ -40,6 +40,16 @@ def make_project(workspace, name: str) -> Project:
 def add_member(project, user, role: int = 20) -> ProjectMember:
     return ProjectMember.objects.create(project=project, member=user, role=role)
 
+def enable_project(client, project) -> None:
+    """调用 enable 端点置位开关（同时自动产出 Epic/Task 两类型与项目桥）"""
+    url = reverse(
+        "project-work-item-types-enable",
+        kwargs={"slug": project.workspace.slug, "project_id": str(project.id)},
+    )
+    response = client.post(url, format="json")
+    assert response.status_code == status.HTTP_200_OK
+
+
 
 @pytest.fixture
 def project(workspace, create_user):
@@ -180,13 +190,12 @@ class TestWorkItemTypeCRUD:
             kwargs={"slug": project.workspace.slug, "project_id": str(project.id)},
         )
 
-    def _enable_project(self, project):
-        project.is_issue_type_enabled = True
-        project.save(update_fields=["is_issue_type_enabled"])
+    def _enable_project(self, client, project):
+        enable_project(client, project)
 
     def test_create_defaults_to_inactive(self, session_client, project):
         """A-5：新建类型默认「已禁用」（model 默认 True，由序列化层覆盖）"""
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         response = session_client.post(self._types_url(project), {"name": "调研-缺陷"}, format="json")
         assert response.status_code == status.HTTP_200_OK
         assert response.data["is_active"] is False
@@ -198,20 +207,20 @@ class TestWorkItemTypeCRUD:
         assert ProjectIssueType.objects.filter(project=project, issue_type=issue_type).exists()
 
     def test_create_duplicate_name_returns_400(self, session_client, project):
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         first = session_client.post(self._types_url(project), {"name": "Bug"}, format="json")
         assert first.status_code == status.HTTP_200_OK
         response = session_client.post(self._types_url(project), {"name": "Bug"}, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_create_missing_name_returns_400(self, session_client, project):
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         response = session_client.post(self._types_url(project), {}, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_partial_update_activates_type(self, session_client, project):
         """A-6：行菜单「启用」→ 地位变活动（PATCH is_active）"""
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         issue_type = IssueType.objects.create(workspace=project.workspace, name="Feature", is_active=False)
         ProjectIssueType.objects.create(project=project, issue_type=issue_type)
 
@@ -226,7 +235,7 @@ class TestWorkItemTypeCRUD:
 
     def test_partial_update_cannot_flip_is_epic(self, session_client, project):
         """is_epic 为只读字段，防止客户端伪造 Epic 类型"""
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         issue_type = IssueType.objects.create(workspace=project.workspace, name="Custom", is_active=True)
         ProjectIssueType.objects.create(project=project, issue_type=issue_type)
 
@@ -241,7 +250,7 @@ class TestWorkItemTypeCRUD:
 
     def test_guest_is_read_only(self, session_client, project):
         """A-14 后半句：Guest 读 200 / 写 403"""
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         guest = make_user("guest-types@plane.so")
         add_member(project, guest, role=5)
 
@@ -258,7 +267,7 @@ class TestWorkItemTypeCRUD:
 
     def test_list_response_shape(self, session_client, project):
         """序列化字段面：id/name/logo_props/is_epic/is_default/is_active/level + issues_count"""
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         response = session_client.get(self._types_url(project))
         assert response.status_code == status.HTTP_200_OK
         data = response.data
@@ -286,13 +295,12 @@ class TestWorkItemTypeMarkDefault:
             kwargs={"slug": project.workspace.slug, "project_id": str(project.id), "pk": str(issue_type.id)},
         )
 
-    def _enable_project(self, project):
-        project.is_issue_type_enabled = True
-        project.save(update_fields=["is_issue_type_enabled"])
+    def _enable_project(self, client, project):
+        enable_project(client, project)
 
     def test_mark_default_moves_the_badge(self, session_client, project):
         """A-9：设默认后「默认」badge 迁移，唯一默认成立"""
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         task = IssueType.objects.get(workspace=project.workspace, name="Task", is_epic=False)
         assert ProjectIssueType.objects.get(project=project, issue_type=task).is_default is True
 
@@ -309,7 +317,7 @@ class TestWorkItemTypeMarkDefault:
 
     def test_mark_default_rejected_for_inactive_type(self, session_client, project):
         """A-6：未激活类型设默认 → 400"""
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         inactive = IssueType.objects.create(workspace=project.workspace, name="Inactive", is_active=False)
         ProjectIssueType.objects.create(project=project, issue_type=inactive)
 
@@ -326,13 +334,12 @@ class TestWorkItemTypeDeleteConstraints:
             kwargs={"slug": project.workspace.slug, "project_id": str(project.id), "pk": str(issue_type.id)},
         )
 
-    def _enable_project(self, project):
-        project.is_issue_type_enabled = True
-        project.save(update_fields=["is_issue_type_enabled"])
+    def _enable_project(self, client, project):
+        enable_project(client, project)
 
     def test_default_type_cannot_be_deleted(self, session_client, project):
         """A-7：默认类型删除 → 400"""
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         task = IssueType.objects.get(workspace=project.workspace, name="Task", is_epic=False)
 
         response = session_client.delete(self._type_detail_url(project, task))
@@ -341,7 +348,7 @@ class TestWorkItemTypeDeleteConstraints:
 
     def test_epic_type_cannot_be_deleted(self, session_client, project):
         """A-8：内置 Epic 类型删除 → 400"""
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         epic = IssueType.objects.get(workspace=project.workspace, name="Epic", is_epic=True)
 
         response = session_client.delete(self._type_detail_url(project, epic))
@@ -349,7 +356,7 @@ class TestWorkItemTypeDeleteConstraints:
 
     def test_referenced_type_cannot_be_deleted(self, session_client, project):
         """A-15：被工作项引用的类型删除 → 400"""
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         task = IssueType.objects.get(workspace=project.workspace, name="Task", is_epic=False)
         ProjectIssueType.objects.filter(project=project, issue_type=task).update(is_default=False)
 
@@ -362,7 +369,7 @@ class TestWorkItemTypeDeleteConstraints:
         assert IssueType.objects.filter(pk=task.pk).exists()
 
     def test_unreferenced_type_can_be_deleted(self, session_client, project):
-        self._enable_project(project)
+        self._enable_project(session_client, project)
         issue_type = IssueType.objects.create(workspace=project.workspace, name="Disposable", is_active=True)
         ProjectIssueType.objects.create(project=project, issue_type=issue_type)
 
@@ -445,8 +452,7 @@ class TestProjectIssueTypeBinding:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_default_binding_cannot_be_unbound(self, session_client, project):
-        project.is_issue_type_enabled = True
-        project.save(update_fields=["is_issue_type_enabled"])
+        enable_project(session_client, project)
         task = IssueType.objects.get(workspace=project.workspace, name="Task", is_epic=False)
         bridge = ProjectIssueType.objects.get(project=project, issue_type=task)
         assert bridge.is_default is True

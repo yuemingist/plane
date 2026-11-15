@@ -86,11 +86,12 @@ class TestEpicList:
         )
         response = session_client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        ids = [item["id"] for item in response.data["results"]]
+        # response.data 是渲染前数据：values()/PK 字段返回 UUID 对象，统一 str 对比
+        ids = [str(item["id"]) for item in response.data["results"]]
         assert str(epic_issue.id) in ids
         assert len(ids) == 1
         # 列表响应带 type_id（BE-3 读模型）
-        assert response.data["results"][0]["type_id"] == str(types["epic"].id)
+        assert str(response.data["results"][0]["type_id"]) == str(types["epic"].id)
 
     def test_epic_detail_404_for_non_epic_issue(self, session_client, enabled_project, types, mock_celery):
         """非 Epic 工作项在 Epic 域详情 404（retrieve 前置校验）"""
@@ -120,7 +121,7 @@ class TestEpicList:
         )
         response = session_client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["type_id"] == str(types["epic"].id)
+        assert str(response.data["type_id"]) == str(types["epic"].id)
 
 
 class TestEpicCreate:
@@ -270,7 +271,7 @@ class TestEpicLinks:
         )
         response = session_client.post(url, {"title": "Docs", "url": "https://plane.so"}, format="json")
         assert response.status_code == status.HTTP_201_CREATED
-        assert response.data["issue"] == str(epic_issue.id)
+        assert str(response.data["issue"]) == str(epic_issue.id)
 
         listing = session_client.get(url)
         assert listing.status_code == status.HTTP_200_OK

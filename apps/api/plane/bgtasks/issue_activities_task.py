@@ -193,8 +193,11 @@ def track_type(
 
     if current_type_id != requested_type_id:
         type_ids = [str(x) for x in (current_type_id, requested_type_id) if x is not None]
-        # 名称解析：跨请求查 IssueType；已删类型兜底显示 UUID 前缀（R6）
-        types_by_id = IssueType.objects.in_bulk(type_ids) if type_ids else {}
+        # 名称解析：跨请求查 IssueType；已删类型兜底显示 UUID 前缀（R6）。
+        # 注意 in_bulk 返回的字典键是 UUID 对象，这里统一转成 str 键再查
+        types_by_id = {
+            str(pk): issue_type for pk, issue_type in IssueType.objects.in_bulk(type_ids).items()
+        }
 
         def _type_name(type_id):
             if type_id is None:

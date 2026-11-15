@@ -67,7 +67,8 @@ class TestIssueSerializerTypeId:
         from plane.app.serializers import IssueSerializer
 
         data = IssueSerializer(issue).data
-        assert data["type_id"] == str(types["bug"].id)
+        # PK 字段返回 UUID 对象（渲染前数据），统一 str 对比
+        assert str(data["type_id"]) == str(types["bug"].id)
 
     def test_issue_detail_serializer_inherits_type_id(self, project, types):
         """current_instance 序列化包含 type_id（track_type 依赖它取旧值）"""
@@ -75,7 +76,7 @@ class TestIssueSerializerTypeId:
         from plane.app.serializers import IssueDetailSerializer
 
         data = IssueDetailSerializer(issue).data
-        assert data["type_id"] == str(types["bug"].id)
+        assert str(data["type_id"]) == str(types["bug"].id)
         # 原有字段不缺（抽样）
         for key in ("id", "name", "state_id", "priority", "sequence_id", "project_id", "parent_id"):
             assert key in data
@@ -97,8 +98,8 @@ class TestWorkItemsListTypeId:
         response = session_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         results = response.data["results"]
-        target = next(item for item in results if item["id"] == str(issue.id))
-        assert target["type_id"] == str(types["task"].id)
+        target = next(item for item in results if str(item["id"]) == str(issue.id))
+        assert str(target["type_id"]) == str(types["task"].id)
         # 原有字段不缺（抽样）
         for key in ("name", "state_id", "priority", "sequence_id", "project_id", "parent_id", "created_at"):
             assert key in target
@@ -110,14 +111,14 @@ class TestWorkItemsListTypeId:
         url = reverse("project-issue", kwargs={"slug": project.workspace.slug, "project_id": str(project.id)})
         response = session_client.get(f"{url}list/", {"issues": str(issue.id)})
         assert response.status_code == status.HTTP_200_OK
-        target = next(item for item in response.data if item["id"] == str(issue.id))
-        assert target["type_id"] == str(types["bug"].id)
+        target = next(item for item in response.data if str(item["id"]) == str(issue.id))
+        assert str(target["type_id"]) == str(types["bug"].id)
 
     def test_issue_create_response_contains_type_id(self, session_client, project, types, mock_celery):
         url = reverse("project-issue", kwargs={"slug": project.workspace.slug, "project_id": str(project.id)})
         response = session_client.post(url, {"name": "Created issue", "type_id": str(types["bug"].id)}, format="json")
         assert response.status_code == status.HTTP_201_CREATED
-        assert response.data["type_id"] == str(types["bug"].id)
+        assert str(response.data["type_id"]) == str(types["bug"].id)
 
 
 class TestIssueTypeFilters:
@@ -168,7 +169,7 @@ class TestIssueTypeFilters:
         filters = json.dumps({"parent__type_id": str(types["epic"].id)})
         response = session_client.get(url, {"filters": filters})
         assert response.status_code == status.HTTP_200_OK
-        ids = {item["id"] for item in response.data["results"]}
+        ids = {str(item["id"]) for item in response.data["results"]}
         assert ids == {str(child.id)}
 
     def test_filter_type_id_via_work_items_api(self, session_client, project, types, mock_celery):
@@ -179,7 +180,7 @@ class TestIssueTypeFilters:
         filters = json.dumps({"type_id": str(types["bug"].id)})
         response = session_client.get(url, {"filters": filters})
         assert response.status_code == status.HTTP_200_OK
-        ids = {item["id"] for item in response.data["results"]}
+        ids = {str(item["id"]) for item in response.data["results"]}
         assert ids == {str(issue_bug.id)}
 
 
@@ -188,9 +189,12 @@ class TestTypeChangeActivity:
 
     def _run_update_activity(self, issue, old_type, new_type, actor):
         """复刻 IssueViewSet.partial_update 传参：current_instance 来自 IssueDetailSerializer"""
+        from django.core.serializers.json import DjangoJSONEncoder
+
         from plane.app.serializers import IssueDetailSerializer
 
-        current_instance = json.dumps(IssueDetailSerializer(issue).data)
+        # 视图同款：序列化器输出含 UUID 对象，必须用 DjangoJSONEncoder
+        current_instance = json.dumps(IssueDetailSerializer(issue).data, cls=DjangoJSONEncoder)
         issue_activity(
             type="issue.activity.updated",
             requested_data=json.dumps({"type_id": str(new_type.id)}),

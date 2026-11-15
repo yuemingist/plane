@@ -25,7 +25,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 # Module imports
-from .. import BaseViewSet
+from .base import BaseViewSet
 from plane.app.permissions import ROLE, allow_permission
 from plane.app.serializers import IssueTypeSerializer, ProjectIssueTypeSerializer
 from plane.db.models import Issue, IssueType, Project, ProjectIssueType
