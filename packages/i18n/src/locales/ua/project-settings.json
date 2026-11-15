@@ -49,7 +49,10 @@
       "empty_state": {
         "title": "Немає станів у групі {groupKey}",
         "description": "Створіть новий стан"
-      }
+      },
+      "cannot_delete_default": "Cannot delete the default state.",
+      "set_as_default": "Mark as default",
+      "state_name_placeholder": "State name"
     },
     "labels": {
       "heading": "Мітки",

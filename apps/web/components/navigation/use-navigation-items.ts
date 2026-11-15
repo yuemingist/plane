@@ -5,10 +5,12 @@
  */
 
 import { useMemo, useCallback } from "react";
+import useSWR from "swr";
 // plane imports
 import { EUserPermissions, EUserPermissionsLevel } from "@plane/constants";
 import {
   CyclesOutline,
+  EpicOutline,
   IntakeOutline,
   ModuleOutline,
   PagesOutline,
@@ -17,6 +19,8 @@ import {
 } from "@makeplane/propel/icons";
 import type { EUserProjectRoles, IPartialProject } from "@plane/types";
 import type { TNavigationItem } from "@/components/navigation/tab-navigation-root";
+// hooks
+import { useIssueType } from "@/hooks/store/use-issue-type";
 
 type UseNavigationItemsProps = {
   workspaceSlug: string;
@@ -36,6 +40,22 @@ export const useNavigationItems = ({
   project,
   allowPermissions,
 }: UseNavigationItemsProps): TNavigationItem[] => {
+  // store hooks
+  const { hasEpicType, fetchProjectWorkItemTypes, areTypesFetched } = useIssueType();
+
+  // the Epic nav item needs the project's type list to evaluate `hasEpicType`;
+  // fetch it once when the project has work item types enabled
+  useSWR(
+    workspaceSlug && projectId && project?.is_issue_type_enabled
+      ? `PROJECT_WORK_ITEM_TYPES_${workspaceSlug}_${projectId}`
+      : null,
+    async () => {
+      if (workspaceSlug && projectId && !areTypesFetched(projectId)) {
+        await fetchProjectWorkItemTypes(workspaceSlug, projectId);
+      }
+    },
+    { revalidateIfStale: false, revalidateOnFocus: false }
+  );
   // Base navigation items
   const baseNavigation = useCallback(
     // oxlint-disable-next-line no-shadow
@@ -51,6 +71,18 @@ export const useNavigationItems = ({
         sortOrder: 1,
       },
       {
+        // Epic layout entry point: shown when the project has work item types enabled
+        // and an active type with `is_epic` exists (no separate feature flag, 产品方案 §5.1)
+        i18n_key: "sidebar.epics",
+        key: "epics",
+        name: "Epics",
+        href: `/${workspaceSlug}/projects/${projectId}/epics`,
+        icon: EpicOutline,
+        access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
+        shouldRender: !!project?.is_issue_type_enabled && hasEpicType(projectId),
+        sortOrder: 2,
+      },
+      {
         i18n_key: "sidebar.cycles",
         key: "cycles",
         name: "Cycles",
@@ -58,7 +90,7 @@ export const useNavigationItems = ({
         icon: CyclesOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
         shouldRender: !!project?.cycle_view,
-        sortOrder: 2,
+        sortOrder: 3,
       },
       {
         i18n_key: "sidebar.modules",
@@ -68,7 +100,7 @@ export const useNavigationItems = ({
         icon: ModuleOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
         shouldRender: !!project?.module_view,
-        sortOrder: 3,
+        sortOrder: 4,
       },
       {
         i18n_key: "sidebar.views",
@@ -78,7 +110,7 @@ export const useNavigationItems = ({
         icon: ViewsOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
         shouldRender: !!project?.issue_views_view,
-        sortOrder: 4,
+        sortOrder: 5,
       },
       {
         i18n_key: "sidebar.pages",
@@ -88,7 +120,7 @@ export const useNavigationItems = ({
         icon: PagesOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
         shouldRender: !!project?.page_view,
-        sortOrder: 5,
+        sortOrder: 6,
       },
       {
         i18n_key: "sidebar.intake",
@@ -98,10 +130,10 @@ export const useNavigationItems = ({
         icon: IntakeOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
         shouldRender: !!project?.inbox_view,
-        sortOrder: 6,
+        sortOrder: 7,
       },
     ],
-    [project]
+    [project, hasEpicType, projectId]
   );
 
   // Combine, filter, and sort navigation items

@@ -49,7 +49,10 @@
       "empty_state": {
         "title": "Няма налични състояния за групата {groupKey}",
         "description": "Създайте ново състояние"
-      }
+      },
+      "cannot_delete_default": "Cannot delete the default state.",
+      "set_as_default": "Mark as default",
+      "state_name_placeholder": "State name"
     },
     "labels": {
       "heading": "Етикети",

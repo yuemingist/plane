@@ -4,15 +4,19 @@
  * See the LICENSE file for details.
  */
 
+/* oxlint-disable no-shadow -- 本文件沿用上游 project/projectId 命名，shadow 为同类误报 */
+
 import { useCallback, useMemo } from "react";
 import {
   AtOutline,
   CalendarOutline,
   CyclesOutline,
   DueDateOutline,
+  EpicOutline,
   LabelsOutline,
   MembersOutline,
   ModuleOutline,
+  ParentOutline,
   PriorityOutline,
   ProjectsOutline,
   StartDateOutline,
@@ -40,9 +44,11 @@ import {
   getCreatedByFilterConfig,
   getCycleFilterConfig,
   getFileURL,
+  getIssueTypeFilterConfig,
   getLabelFilterConfig,
   getMentionFilterConfig,
   getModuleFilterConfig,
+  getParentTypeFilterConfig,
   getPriorityFilterConfig,
   getProjectFilterConfig,
   getStartDateFilterConfig,
@@ -55,6 +61,7 @@ import {
 } from "@plane/utils";
 // store hooks
 import { useCycle } from "@/hooks/store/use-cycle";
+import { useIssueType } from "@/hooks/store/use-issue-type";
 import { useLabel } from "@/hooks/store/use-label";
 import { useMember } from "@/hooks/store/use-member";
 import { useModule } from "@/hooks/store/use-module";
@@ -62,6 +69,8 @@ import { useProject } from "@/hooks/store/use-project";
 import { useProjectState } from "@/hooks/store/use-project-state";
 // plane web imports
 import { useFiltersOperatorConfigs } from "@/hooks/rich-filters/use-filters-operator-configs";
+// components
+import { TypeIcon } from "@/components/settings/projects/work-item-types/type-icon";
 
 export type TWorkItemFiltersEntityProps = {
   workspaceSlug: string;
@@ -97,11 +106,13 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
   const { getLabelById } = useLabel();
   const { getModuleById } = useModule();
   const { getStateById } = useProjectState();
+  const { getTypesByProjectId } = useIssueType();
   const { getUserDetails } = useMember();
   // derived values
   const operatorConfigs = useFiltersOperatorConfigs({ workspaceSlug });
   const filtersToShow = useMemo(() => new Set(allowedFilters), [allowedFilters]);
   const project = useMemo(() => getProjectById(projectId), [projectId, getProjectById]);
+  const projectIssueTypes = useMemo(() => getTypesByProjectId(projectId) ?? [], [getTypesByProjectId, projectId]);
   const members: IUserLite[] | undefined = useMemo(
     () =>
       memberIds
@@ -362,6 +373,32 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
     [isFilterEnabled, projects, operatorConfigs]
   );
 
+  // issue type filter config (1b-4): values = the project's work item types
+  const issueTypeFilterConfig = useMemo(
+    () =>
+      getIssueTypeFilterConfig<TWorkItemFilterProperty>("type_id")({
+        isEnabled: isFilterEnabled("type_id") && projectIssueTypes.length > 0,
+        filterIcon: EpicOutline,
+        issueTypes: projectIssueTypes,
+        getOptionIcon: (issueType) => <TypeIcon issueType={issueType} size={14} />,
+        ...operatorConfigs,
+      }),
+    [isFilterEnabled, projectIssueTypes, operatorConfigs]
+  );
+
+  // parent type filter config (1b-4): relationship filter over the parent's type
+  const parentTypeFilterConfig = useMemo(
+    () =>
+      getParentTypeFilterConfig<TWorkItemFilterProperty>("parent__type_id")({
+        isEnabled: isFilterEnabled("parent__type_id") && projectIssueTypes.length > 0,
+        filterIcon: ParentOutline,
+        issueTypes: projectIssueTypes,
+        getOptionIcon: (issueType) => <TypeIcon issueType={issueType} size={14} />,
+        ...operatorConfigs,
+      }),
+    [isFilterEnabled, projectIssueTypes, operatorConfigs]
+  );
+
   return {
     areAllConfigsInitialized,
     configs: [
@@ -374,6 +411,8 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
       labelFilterConfig,
       cycleFilterConfig,
       moduleFilterConfig,
+      issueTypeFilterConfig,
+      parentTypeFilterConfig,
       startDateFilterConfig,
       targetDateFilterConfig,
       createdAtFilterConfig,
@@ -393,6 +432,8 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
       created_by_id: createdByFilterConfig,
       subscriber_id: subscriberFilterConfig,
       priority: priorityFilterConfig,
+      type_id: issueTypeFilterConfig,
+      parent__type_id: parentTypeFilterConfig,
       start_date: startDateFilterConfig,
       target_date: targetDateFilterConfig,
       created_at: createdAtFilterConfig,

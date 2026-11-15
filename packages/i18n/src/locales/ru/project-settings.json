@@ -49,7 +49,10 @@
       "empty_state": {
         "title": "Нет статусов для группы {groupKey}",
         "description": "Создайте новый статус"
-      }
+      },
+      "cannot_delete_default": "Cannot delete the default state.",
+      "set_as_default": "Mark as default",
+      "state_name_placeholder": "State name"
     },
     "labels": {
       "heading": "Метки",

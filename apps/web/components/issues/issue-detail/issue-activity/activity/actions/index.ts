@@ -13,6 +13,7 @@ export * from "./priority";
 export * from "./estimate";
 export * from "./parent";
 export * from "./relation";
+export * from "./type";
 export * from "./start_date";
 export * from "./target_date";
 export * from "./cycle";

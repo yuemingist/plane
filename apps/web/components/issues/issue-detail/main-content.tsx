@@ -18,6 +18,7 @@ import { EFileAssetType, EIssueServiceType } from "@plane/types";
 import { DescriptionVersionsRoot } from "@/components/core/description-versions";
 import { DescriptionInput } from "@/components/editor/rich-text/description-input";
 import { IssueTypeSwitcher } from "@/components/issues/issue-type-switcher";
+import { WorkItemTypeChip } from "@/components/issues/issue-detail/work-item-type-chip";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useMember } from "@/hooks/store/use-member";
@@ -120,6 +121,15 @@ export const IssueMainContent = observer(function IssueMainContent(props: Props)
                 </>
               )}
               <IssueTypeSwitcher issueId={issueId} disabled={isArchived || !isEditable} />
+              {/* work item type chip (1b-1): hidden when the module is disabled or no other type exists */}
+              <WorkItemTypeChip
+                issueId={issueId}
+                disabled={isArchived || !isEditable}
+                onChangeType={(typeId) => {
+                  if (!issue.project_id) return Promise.resolve();
+                  return issueOperations.update(workspaceSlug, issue.project_id, issueId, { type_id: typeId });
+                }}
+              />
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <NameDescriptionUpdateStatus isSubmitting={isSubmitting} />

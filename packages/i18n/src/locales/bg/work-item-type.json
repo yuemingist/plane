@@ -228,8 +228,10 @@
         },
         "empty_state": {
           "title": "Добавете персонализирани свойства",
-          "description": "Новите свойства, които добавите за този тип работен елемент, ще се показват тук."
-        }
+          "description": "Новите свойства, които добавите за този тип работен елемент, ще се показват тук.",
+          "no_properties_description": "No custom properties added yet: define properties to track specific data for this work item type."
+        },
+        "coming_soon_badge": "Coming soon"
       },
       "types": {
         "title": "Типове",
@@ -250,6 +252,11 @@
             "with_access": "Активирайте типовете работни елементи, за да импортирате типове от работното пространство",
             "without_access": "Типовете работни елементи са деактивирани. Свържете се с администратора на работното пространство, за да ги активира в настройките."
           }
+        },
+        "count_label": "Types {count}",
+        "table": {
+          "status_column": "Status",
+          "work_items_count_column": "Features"
         }
       },
       "linked_properties": {
@@ -290,6 +297,12 @@
           "cannot_delete_default_work_item_type": "Типът работен елемент по подразбиране не може да бъде изтрит",
           "cannot_delete_work_item_type_with_associated_work_items": "Тип работен елемент със свързани работни елементи не може да бъде изтрит"
         }
+      },
+      "subtitle": "Work item types help you organize work in your project (Bug, Feature, Task) and define which fields each type includes.",
+      "work_item_type_column": "Work item type",
+      "enable_success_toast": {
+        "title": "Success!",
+        "message": "Work item types have been enabled successfully."
       }
     },
     "create": {
@@ -388,7 +401,8 @@
           "text": "Надгради"
         }
       }
-    }
+    },
+    "switch_entry": "Switch work item type"
   },
   "work_item_type_hierarchy": {
     "settings": {
@@ -404,7 +418,9 @@
       "workspace_work_item_types_disabled_banner": {
         "content": "Първо дефинирайте типове работни елементи, за да създадете нова йерархия.",
         "cta": "Настройки на типовете работни елементи"
-      }
+      },
+      "readonly_description": "Control how work items nest within each other, how many levels deep nesting can go, and which types can sit under which.",
+      "level_label": "Level {level}"
     },
     "levels": {
       "max_level_placeholder": "Плъзнете и пуснете тип, за да добавите ново ниво в йерархията",

@@ -49,7 +49,10 @@
       "empty_state": {
         "title": "No estados disponibles para el grupo {groupKey}",
         "description": "Por favor, crea un nuevo estado"
-      }
+      },
+      "cannot_delete_default": "Cannot delete the default state.",
+      "set_as_default": "Mark as default",
+      "state_name_placeholder": "State name"
     },
     "labels": {
       "heading": "Etiquetas",

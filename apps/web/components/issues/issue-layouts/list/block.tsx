@@ -24,9 +24,11 @@ import { cn, generateWorkItemLink } from "@plane/utils";
 import { MultipleSelectEntityAction } from "@/components/core/multiple-select";
 import { IssueProperties } from "@/components/issues/issue-layouts/properties";
 import { IssueIdentifier } from "@/components/issues/issue-detail/issue-identifier";
+import { TypeIcon } from "@/components/settings/projects/work-item-types/type-icon";
 // hooks
 import { useAppTheme } from "@/hooks/store/use-app-theme";
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
+import { useIssueType } from "@/hooks/store/use-issue-type";
 import { useProject } from "@/hooks/store/use-project";
 import { useListRowPropertiesBudget } from "@/hooks/use-list-row-properties-budget";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
@@ -81,6 +83,7 @@ export const IssueBlock = observer(function IssueBlock(props: IssueBlockProps) {
   // hooks
   const { sidebarCollapsed: isSidebarCollapsed } = useAppTheme();
   const { getProjectIdentifierById, currentProjectNextSequenceId } = useProject();
+  const { getTypeById } = useIssueType();
   const {
     getIsIssuePeeked,
     peekIssue,
@@ -106,6 +109,8 @@ export const IssueBlock = observer(function IssueBlock(props: IssueBlockProps) {
   const issue = issuesMap[issueId];
   const subIssuesCount = issue?.sub_issues_count ?? 0;
   const canEditIssueProperties = canEditProperties(issue?.project_id ?? undefined);
+  // work item type icon (1b-3): rendered before the identifier when the display property is on
+  const issueType = issue?.type_id ? getTypeById(issue.type_id) : undefined;
   const isDraggingAllowed = canDrag && canEditIssueProperties;
 
   const { isMobile } = usePlatformOS();
@@ -240,6 +245,11 @@ export const IssueBlock = observer(function IssueBlock(props: IssueBlockProps) {
               )}
               {displayProperties && (displayProperties.key || displayProperties.issue_type) && (
                 <div className="flex-shrink-0" style={{ minWidth: `${keyMinWidth}px` }}>
+                  {displayProperties.issue_type && issueType && (
+                    <span className="mr-1 inline-flex shrink-0 align-middle">
+                      <TypeIcon issueType={issueType} size={14} />
+                    </span>
+                  )}
                   {issue.project_id && (
                     <IssueIdentifier
                       issueId={issueId}

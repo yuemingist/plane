@@ -49,7 +49,10 @@
       "empty_state": {
         "title": "Geen statussen beschikbaar voor de groep {groupKey}",
         "description": "Maak een nieuwe status aan"
-      }
+      },
+      "cannot_delete_default": "Cannot delete the default state.",
+      "set_as_default": "Mark as default",
+      "state_name_placeholder": "State name"
     },
     "labels": {
       "heading": "Labels",

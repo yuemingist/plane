@@ -36,13 +36,15 @@ type Props = {
   canUserCreateIssue: boolean | undefined;
   storeType?: EIssuesStoreType.PROJECT | EIssuesStoreType.EPIC;
 };
-const LAYOUTS = [
+const PROJECT_LAYOUTS = [
   EIssueLayoutTypes.LIST,
   EIssueLayoutTypes.KANBAN,
   EIssueLayoutTypes.CALENDAR,
   EIssueLayoutTypes.SPREADSHEET,
   EIssueLayoutTypes.GANTT,
 ];
+// the Epic layout ships with list + gantt only (the layouts verified against the cloud Epic view)
+const EPIC_LAYOUTS = [EIssueLayoutTypes.LIST, EIssueLayoutTypes.GANTT];
 
 export const HeaderFilters = observer(function HeaderFilters(props: Props) {
   const {
@@ -52,6 +54,8 @@ export const HeaderFilters = observer(function HeaderFilters(props: Props) {
     canUserCreateIssue,
     storeType = EIssuesStoreType.PROJECT,
   } = props;
+  // derived values
+  const LAYOUTS = storeType === EIssuesStoreType.EPIC ? EPIC_LAYOUTS : PROJECT_LAYOUTS;
   // i18n
   const { t } = useTranslation();
   // states

@@ -49,7 +49,10 @@
       "empty_state": {
         "title": "Không có trạng thái trong nhóm {groupKey}",
         "description": "Vui lòng tạo một trạng thái mới"
-      }
+      },
+      "cannot_delete_default": "Cannot delete the default state.",
+      "set_as_default": "Mark as default",
+      "state_name_placeholder": "State name"
     },
     "labels": {
       "heading": "Nhãn",

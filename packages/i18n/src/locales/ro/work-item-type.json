@@ -228,8 +228,10 @@
         },
         "empty_state": {
           "title": "Adaugă proprietăți personalizate",
-          "description": "Noile proprietăți pe care le adaugi pentru acest tip de element de lucru vor apărea aici."
-        }
+          "description": "Noile proprietăți pe care le adaugi pentru acest tip de element de lucru vor apărea aici.",
+          "no_properties_description": "No custom properties added yet: define properties to track specific data for this work item type."
+        },
+        "coming_soon_badge": "Coming soon"
       },
       "types": {
         "title": "Tipuri",
@@ -250,6 +252,11 @@
             "with_access": "Activează tipurile de activități pentru a importa tipuri de la nivelul spațiului de lucru",
             "without_access": "Tipurile de activități sunt dezactivate. Contactează administratorul spațiului de lucru pentru a le activa în setările spațiului de lucru."
           }
+        },
+        "count_label": "Types {count}",
+        "table": {
+          "status_column": "Status",
+          "work_items_count_column": "Features"
         }
       },
       "linked_properties": {
@@ -290,6 +297,12 @@
           "cannot_delete_default_work_item_type": "Nu se poate șterge tipul implicit de element de lucru",
           "cannot_delete_work_item_type_with_associated_work_items": "Nu se poate șterge tipul de element de lucru cu elemente de lucru asociate"
         }
+      },
+      "subtitle": "Work item types help you organize work in your project (Bug, Feature, Task) and define which fields each type includes.",
+      "work_item_type_column": "Work item type",
+      "enable_success_toast": {
+        "title": "Success!",
+        "message": "Work item types have been enabled successfully."
       }
     },
     "create": {
@@ -388,7 +401,8 @@
           "text": "Actualizează"
         }
       }
-    }
+    },
+    "switch_entry": "Switch work item type"
   },
   "work_item_type_hierarchy": {
     "settings": {
@@ -404,7 +418,9 @@
       "workspace_work_item_types_disabled_banner": {
         "content": "Definiți mai întâi tipurile de elemente de lucru pentru a crea o nouă ierarhie.",
         "cta": "Setări tipuri elemente de lucru"
-      }
+      },
+      "readonly_description": "Control how work items nest within each other, how many levels deep nesting can go, and which types can sit under which.",
+      "level_label": "Level {level}"
     },
     "levels": {
       "max_level_placeholder": "Trageți și plasați un tip pentru a adăuga un nou nivel ierarhic",
