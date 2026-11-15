@@ -1,0 +1,85 @@
+# Copyright (c) 2023-present Plane Software, Inc. and contributors
+# SPDX-License-Identifier: AGPL-3.0-only
+# See the LICENSE file for details.
+
+# Third Party imports
+from rest_framework import serializers
+
+# Module imports
+from .base import BaseSerializer
+from plane.db.models import IssueType, ProjectIssueType
+
+
+class IssueTypeSerializer(BaseSerializer):
+    """工作项类型序列化器（app 端，项目语境）。
+
+    注意：
+    - `is_default` 语义以 `ProjectIssueType.is_default`（项目桥）为准；
+      `IssueType.is_default`（工作区级默认字段）本步不消费，序列化器不做输出。
+    - `is_default` 与 `issues_count` 由 ViewSet 通过 annotate 注入实例属性
+      （项目桥子查询 / 引用计数），非模型列，因此用 method 字段读取。
+    """
+
+    is_default = serializers.SerializerMethodField()
+    issues_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = IssueType
+        fields = [
+            "id",
+            "name",
+            "description",
+            "logo_props",
+            "is_epic",
+            "is_active",
+            "level",
+            "is_default",
+            "issues_count",
+            "external_source",
+            "external_id",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "is_epic",
+            "is_default",
+            "issues_count",
+            "external_source",
+            "external_id",
+            "created_at",
+            "updated_at",
+        ]
+
+    def get_is_default(self, instance) -> bool:
+        # 读取 ViewSet annotate 注入的项目桥默认标记；无 annotate（或桥缺失）时视为非默认
+        return bool(getattr(instance, "project_is_default", False))
+
+    def get_issues_count(self, instance) -> int:
+        # 引用计数（「特性」列数据源），由 ViewSet annotate 注入；缺省 0
+        return int(getattr(instance, "project_issues_count", 0) or 0)
+
+    def validate(self, attrs):
+        # 新建类型默认「已禁用」：model 默认 True，这里在序列化层覆盖（产品方案 §3.3）
+        if self.instance is None and "is_active" not in attrs:
+            attrs["is_active"] = False
+        return attrs
+
+
+class ProjectIssueTypeSerializer(BaseSerializer):
+    """项目 <-> 类型桥的最小绑定面（本步不做属性绑定）。"""
+
+    issue_type_detail = IssueTypeSerializer(source="issue_type", read_only=True)
+
+    class Meta:
+        model = ProjectIssueType
+        fields = [
+            "id",
+            "issue_type",
+            "issue_type_detail",
+            "level",
+            "is_default",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "issue_type_detail", "created_at", "updated_at"]

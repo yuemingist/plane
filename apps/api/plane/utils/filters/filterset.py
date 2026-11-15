@@ -162,6 +162,12 @@ class IssueFilterSet(BaseFilterSet):
     state_id = filters.UUIDFilter(field_name="state_id")
     state_id__in = UUIDInFilter(field_name="state_id", lookup_expr="in")
 
+    # 筛选 Type / Parent type（Step01 追赶 BE-3，B-6/B-7 后端面）：直查 type_id；
+    # parent__type_id 按「父工作项的类型」过滤（Parent type 关系筛选）
+    type_id = filters.UUIDFilter(field_name="type_id")
+    type_id__in = UUIDInFilter(field_name="type_id", lookup_expr="in")
+    parent__type_id = filters.UUIDFilter(field_name="parent__type_id")
+
     project_id = filters.UUIDFilter(field_name="project_id")
     project_id__in = UUIDInFilter(field_name="project_id", lookup_expr="in")
 

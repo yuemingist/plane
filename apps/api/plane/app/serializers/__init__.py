@@ -135,3 +135,6 @@ from .draft import (
     DraftIssueSerializer,
     DraftIssueDetailSerializer,
 )
+
+# 工作项类型域（Step01 追赶 BE-1）
+from .issue_type import IssueTypeSerializer, ProjectIssueTypeSerializer
