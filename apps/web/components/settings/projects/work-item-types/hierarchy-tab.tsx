@@ -4,7 +4,6 @@
  * See the LICENSE file for details.
  */
 
-import { groupBy } from "lodash-es";
 import { observer } from "mobx-react";
 import { useTranslation } from "@plane/i18n";
 // hooks
@@ -19,8 +18,9 @@ type THierarchyTabProps = {
 
 /**
  * Hierarchy tab — read-only visualization ("Level 1: Epic → Level 0: Task / custom types").
- * Level editing is intentionally not implemented in this step; the chips are static
- * (no edit controls on hover/click), pending the official editable-hierarchy design.
+ * Grouping follows the cloud shape (BUG-04): the top row is the `is_epic` types (labeled with
+ * their level), the bottom row is everything else. Level editing is intentionally not
+ * implemented in this step; the chips are static (no edit controls on hover/click).
  */
 export const HierarchyTab = observer(function HierarchyTab(props: THierarchyTabProps) {
   const { projectId } = props;
@@ -29,33 +29,33 @@ export const HierarchyTab = observer(function HierarchyTab(props: THierarchyTabP
   const { getTypesByProjectId } = useIssueType();
   // derived values
   const projectTypes = getTypesByProjectId(projectId) ?? [];
-  // sort so that the highest level appears first
-  const typesByLevel = groupBy(
-    // oxlint-disable-next-line unicorn/no-array-sort
-    [...projectTypes].sort((a, b) => b.level - a.level),
-    "level"
-  );
-  const levels = Object.keys(typesByLevel)
-    .map(Number)
-    // oxlint-disable-next-line unicorn/no-array-sort
-    .sort((a, b) => b - a);
+  // top row: epic types (level from data, falling back to 1); bottom row: all remaining types
+  const epicLevel = projectTypes.find((type) => type.is_epic)?.level ?? 1;
+  const topLevelTypes = projectTypes.filter((type) => type.is_epic || type.level >= epicLevel);
+  const bottomLevelTypes = projectTypes.filter((type) => !type.is_epic && type.level < epicLevel);
+  const groups = [
+    { level: epicLevel, types: topLevelTypes },
+    { level: 0, types: bottomLevelTypes },
+  ].filter((group) => group.types.length > 0);
+  // oxlint-disable-next-line unicorn/no-array-sort
+  groups.sort((a, b) => b.level - a.level);
 
   return (
     <div className="flex flex-col gap-6">
       <p className="text-body-xs-regular text-tertiary">
         {t("work_item_type_hierarchy.settings.readonly_description")}
       </p>
-      {levels.length === 0 ? (
+      {groups.length === 0 ? (
         <p className="text-body-sm-regular text-tertiary">{t("common.search.no_results.title")}</p>
       ) : (
         <div className="flex flex-col gap-4">
-          {levels.map((level, levelIndex) => (
-            <div key={level} className="flex flex-col gap-3">
+          {groups.map((group, groupIndex) => (
+            <div key={group.level} className="flex flex-col gap-3">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-body-sm-medium text-secondary">
-                  {t("work_item_type_hierarchy.settings.level_label", { level })}
+                  {t("work_item_type_hierarchy.settings.level_label", { level: group.level })}
                 </span>
-                {typesByLevel[level].map((issueType) => (
+                {group.types.map((issueType) => (
                   <span
                     key={issueType.id}
                     className="flex items-center gap-1.5 rounded-md border border-subtle bg-layer-1 px-2.5 py-1 text-body-sm-regular text-primary"
@@ -70,7 +70,7 @@ export const HierarchyTab = observer(function HierarchyTab(props: THierarchyTabP
                   </span>
                 ))}
               </div>
-              {levelIndex < levels.length - 1 && (
+              {groupIndex < groups.length - 1 && (
                 <span className="ml-6 text-tertiary" aria-hidden>
                   ↓
                 </span>

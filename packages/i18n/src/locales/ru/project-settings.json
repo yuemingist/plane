@@ -52,7 +52,8 @@
       },
       "cannot_delete_default": "Cannot delete the default state.",
       "set_as_default": "Mark as default",
-      "state_name_placeholder": "State name"
+      "state_name_placeholder": "State name",
+      "cannot_have_empty_group": "Cannot have an empty group."
     },
     "labels": {
       "heading": "Метки",

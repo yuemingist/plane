@@ -26,7 +26,8 @@ type TTypeRowMenuProps = {
 /**
  * The type row's "…" menu, following the cloud state machine:
  * - inactive type: set as default (locked with hint) / edit / enable / delete
- * - active non-default type (Epic included): disable only
+ * - active non-default type: set as default / disable (BUG-03 裁决口径：活动非默认类型必须
+ *   能设为默认，否则唯一默认无法迁移，功能不闭环；内置 Epic 除外，保持仅「禁用」)
  * - default type: edit, delete locked (cannot delete the project default)
  */
 export const TypeRowMenu = observer(function TypeRowMenu(props: TTypeRowMenuProps) {
@@ -38,7 +39,7 @@ export const TypeRowMenu = observer(function TypeRowMenu(props: TTypeRowMenuProp
   // hooks
   const { t } = useTranslation();
   // derived values
-  const { is_active: isActive, is_default: isDefault } = issueType;
+  const { is_active: isActive, is_default: isDefault, is_epic: isEpic } = issueType;
   const isDeleteDisabled = isDefault;
   const deleteDisabledReason = isDefault ? t("work_item_types.settings.cant_delete_default_message") : undefined;
 
@@ -143,12 +144,23 @@ export const TypeRowMenu = observer(function TypeRowMenu(props: TTypeRowMenuProp
             </>
           )}
           {isActive && !isDefault && (
-            // active non-default types (built-in Epic included) only offer "Disable"
-            <MenuItem
-              label={t("common.actions.disable")}
-              disabled={isLoading}
-              onClick={() => void withLoader(() => onUpdate({ is_active: false }))}
-            />
+            // active non-default types: set as default + disable (BUG-03 裁决口径);
+            // the built-in Epic keeps its cloud-verified "Disable only" menu (TC-1A-008)
+            <>
+              {!isEpic && (
+                <MenuItem
+                  icon={<Icon icon={DefaultTabOutline} />}
+                  label={t("work_item_types.settings.set_as_default")}
+                  disabled={isLoading}
+                  onClick={() => void withLoader(onMarkDefault)}
+                />
+              )}
+              <MenuItem
+                label={t("common.actions.disable")}
+                disabled={isLoading}
+                onClick={() => void withLoader(() => onUpdate({ is_active: false }))}
+              />
+            </>
           )}
         </MenuContent>
       </Menu>

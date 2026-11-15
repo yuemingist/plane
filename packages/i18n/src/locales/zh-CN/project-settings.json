@@ -52,7 +52,8 @@
       },
       "cannot_delete_default": "无法删除默认状态。",
       "set_as_default": "设为默认",
-      "state_name_placeholder": "State name"
+      "state_name_placeholder": "State name",
+      "cannot_have_empty_group": "组不能为空。"
     },
     "labels": {
       "heading": "标签",

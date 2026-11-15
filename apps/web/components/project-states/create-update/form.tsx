@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { toJS } from "mobx";
 import { InputField } from "@makeplane/propel/components/input-field";
 import { Popover, PopoverContent, PopoverTrigger } from "@makeplane/propel/components/popover";
 import { TextAreaField } from "@makeplane/propel/components/text-area-field";
@@ -39,13 +40,15 @@ export function StateForm(props: TStateForm) {
   // plane hooks
   const { t } = useTranslation();
   // states
-  const [formData, setFromData] = useState<Partial<IState> | undefined>(undefined);
+  // initialize synchronously from a plain snapshot of `data` (it may be a mobx observable) so the
+  // controlled inputs are controlled from the first paint — an undefined→value transition after
+  // mount left the InputField's DOM value stale (BUG-01, D6)
+  const [formData, setFromData] = useState<Partial<IState> | undefined>(() => (data ? { ...toJS(data) } : undefined));
   const [errors, setErrors] = useState<Partial<Record<keyof IState, string>> | undefined>(undefined);
 
   useEffect(() => {
-    // snapshot the incoming data once: `data` may be a mobx observable whose fields resolve
-    // asynchronously, so a shallow copy guarantees the controlled inputs pre-fill correctly (D6)
-    if (data && !formData) setFromData({ ...data });
+    // keep the snapshot fresh if `data` arrives/changes after mount (create flow passes a constant)
+    if (data && !formData) setFromData({ ...toJS(data) });
   }, [data, formData]);
 
   const handleFormData = <T extends keyof IState>(key: T, value: IState[T]) => {

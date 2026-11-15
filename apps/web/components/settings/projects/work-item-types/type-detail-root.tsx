@@ -7,7 +7,7 @@
 import { useState } from "react";
 import { observer } from "mobx-react";
 import { useRouter } from "next/navigation";
-import { ArrowNarrowLeftOutline } from "@makeplane/propel/icons";
+import { ArrowNarrowLeftOutline, DefaultTabOutline } from "@makeplane/propel/icons";
 import { Button } from "@makeplane/propel/components/button";
 import { Switch } from "@makeplane/propel/components/switch";
 import { useTranslation } from "@plane/i18n";
@@ -39,7 +39,7 @@ export const TypeDetailRoot = observer(function TypeDetailRoot(props: TTypeDetai
   // hooks
   const { t } = useTranslation();
   const router = useRouter();
-  const { getTypeById, updateWorkItemType } = useIssueType();
+  const { getTypeById, updateWorkItemType, markWorkItemTypeAsDefault } = useIssueType();
   // derived values
   const issueType = getTypeById(issueTypeId);
 
@@ -82,6 +82,24 @@ export const TypeDetailRoot = observer(function TypeDetailRoot(props: TTypeDetai
     }
   };
 
+  const handleMarkDefault = async () => {
+    setIsToggling(true);
+    try {
+      await markWorkItemTypeAsDefault(workspaceSlug, projectId, issueType.id);
+    } catch {
+      setToast({
+        type: "error",
+        title: t("error"),
+        message: t("common.something_went_wrong"),
+      });
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
+  // set-as-default entry (BUG-03 裁决口径): active non-default types only; Epic keeps "disable only"
+  const canMarkDefault = issueType.is_active && !issueType.is_default && !issueType.is_epic;
+
   return (
     <div className="flex flex-col gap-6">
       {/* detail header */}
@@ -104,6 +122,17 @@ export const TypeDetailRoot = observer(function TypeDetailRoot(props: TTypeDetai
           )}
         </div>
         <div className="flex items-center gap-3">
+          {canMarkDefault && (
+            <Button
+              variant="secondary"
+              size="sm"
+              stretch="auto"
+              label={t("work_item_types.settings.set_as_default")}
+              icon={<DefaultTabOutline className="size-3.5" />}
+              disabled={isToggling}
+              onClick={() => void handleMarkDefault()}
+            />
+          )}
           {issueType.is_active ? (
             <span className="text-caption-md-regular text-tertiary">
               {t("work_item_types.settings.properties.enable_disable.label")}

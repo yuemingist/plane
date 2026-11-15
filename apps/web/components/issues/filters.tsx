@@ -6,10 +6,12 @@
 
 import { useCallback, useState } from "react";
 import { observer } from "mobx-react";
-import { AnalyticsOutline, PreferencesOutline } from "@makeplane/propel/icons";
+import { useRouter } from "next/navigation";
+import { AnalyticsOutline, EpicOutline, PreferencesOutline } from "@makeplane/propel/icons";
 // plane imports
 import { EIssueFilterType, ISSUE_STORE_TO_FILTERS_MAP } from "@plane/constants";
 import { useTranslation } from "@plane/i18n";
+import { Tooltip } from "@makeplane/propel/components/tooltip";
 import { Button } from "@makeplane/propel/components/button";
 import { Icon } from "@makeplane/propel/components/icon";
 import { IconButton } from "@makeplane/propel/components/icon-button";
@@ -17,6 +19,7 @@ import type { IIssueDisplayFilterOptions, IIssueDisplayProperties } from "@plane
 import { EIssueLayoutTypes, EIssuesStoreType } from "@plane/types";
 // hooks
 import { useIssues } from "@/hooks/store/use-issues";
+import { useIssueType } from "@/hooks/store/use-issue-type";
 // plane web imports
 import type { TProject } from "@plane/types";
 // local imports
@@ -58,15 +61,25 @@ export const HeaderFilters = observer(function HeaderFilters(props: Props) {
   const LAYOUTS = storeType === EIssuesStoreType.EPIC ? EPIC_LAYOUTS : PROJECT_LAYOUTS;
   // i18n
   const { t } = useTranslation();
+  // router
+  const router = useRouter();
   // states
   const [analyticsModal, setAnalyticsModal] = useState(false);
   // store hooks
   const {
     issuesFilter: { issueFilters, updateFilters },
   } = useIssues(storeType);
+  const { hasEpicType, areTypesFetched } = useIssueType();
   // derived values
   const activeLayout = issueFilters?.displayFilters?.layout;
   const layoutDisplayFiltersOptions = ISSUE_STORE_TO_FILTERS_MAP[storeType]?.layoutOptions[activeLayout];
+  // Epic layout entry (BUG-05 ①): on the work items page, the switcher gains an Epic entry when
+  // the project has work item types enabled and an active is_epic type exists (or the type list
+  // is still loading); the entry routes to the Epics page
+  const showEpicLayoutEntry =
+    storeType === EIssuesStoreType.PROJECT &&
+    currentProjectDetails?.is_issue_type_enabled === true &&
+    (!areTypesFetched(projectId) || hasEpicType(projectId));
 
   const handleLayoutChange = useCallback(
     (layout: EIssueLayoutTypes) => {
@@ -106,6 +119,18 @@ export const HeaderFilters = observer(function HeaderFilters(props: Props) {
           onChange={(layout) => handleLayoutChange(layout)}
           selectedLayout={activeLayout}
         />
+        {showEpicLayoutEntry && (
+          <Tooltip label={t("epic.label", { count: 2 })} side="bottom">
+            <button
+              type="button"
+              className="grid size-7 place-items-center rounded-md text-tertiary transition-colors hover:bg-layer-transparent-hover hover:text-primary"
+              aria-label={t("sidebar.epics")}
+              onClick={() => router.push(`/${workspaceSlug}/projects/${projectId}/epics`)}
+            >
+              <EpicOutline className="size-4" />
+            </button>
+          </Tooltip>
+        )}
       </div>
       <div className="flex @4xl:hidden">
         <MobileLayoutSelection

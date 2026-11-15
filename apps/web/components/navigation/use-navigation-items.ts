@@ -71,15 +71,16 @@ export const useNavigationItems = ({
         sortOrder: 1,
       },
       {
-        // Epic layout entry point: shown when the project has work item types enabled
-        // and an active type with `is_epic` exists (no separate feature flag, 产品方案 §5.1)
+        // Epic layout entry point (BUG-05): shown as soon as the project has work item types
+        // enabled; hidden only once the type list is loaded and no active `is_epic` type exists
+        // (no separate feature flag, 产品方案 §5.1)
         i18n_key: "sidebar.epics",
         key: "epics",
         name: "Epics",
         href: `/${workspaceSlug}/projects/${projectId}/epics`,
         icon: EpicOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
-        shouldRender: !!project?.is_issue_type_enabled && hasEpicType(projectId),
+        shouldRender: !!project?.is_issue_type_enabled && (!areTypesFetched(projectId) || hasEpicType(projectId)),
         sortOrder: 2,
       },
       {
@@ -133,7 +134,7 @@ export const useNavigationItems = ({
         sortOrder: 7,
       },
     ],
-    [project, hasEpicType, projectId]
+    [project, hasEpicType, areTypesFetched, projectId]
   );
 
   // Combine, filter, and sort navigation items

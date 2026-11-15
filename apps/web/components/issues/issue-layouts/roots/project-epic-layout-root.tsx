@@ -41,7 +41,12 @@ function EpicIssueLayout(props: { activeLayout: EIssueLayoutTypes | undefined })
     );
 
   switch (props.activeLayout) {
-    case EIssueLayoutTypes.LIST:
+    case EIssueLayoutTypes.GANTT:
+      return <BaseGanttRoot isEpic />;
+    // list is the Epic default: any other saved layout (kanban/calendar/spreadsheet carried
+    // over from the work items page preferences) falls back to list so the page never
+    // renders blank on mount (BUG-05 ③)
+    default:
       return (
         <BaseListRoot
           QuickActions={ProjectIssueQuickActions}
@@ -49,10 +54,6 @@ function EpicIssueLayout(props: { activeLayout: EIssueLayoutTypes | undefined })
           isEpic
         />
       );
-    case EIssueLayoutTypes.GANTT:
-      return <BaseGanttRoot isEpic />;
-    default:
-      return null;
   }
 }
 

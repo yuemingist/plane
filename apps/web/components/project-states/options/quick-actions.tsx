@@ -37,7 +37,7 @@ export const StateQuickActions = observer(function StateQuickActions(props: TSta
   const deleteDisabledReason = state.default
     ? t("project_settings.states.cannot_delete_default")
     : totalStates === 1
-      ? "Cannot have an empty group."
+      ? t("project_settings.states.cannot_have_empty_group")
       : undefined;
 
   const handleMarkAsDefault = async () => {
