@@ -285,6 +285,25 @@ class TestWorkItemTypeCRUD:
             "issues_count",
         }.issubset(keys)
 
+    def test_list_exposes_project_bridge_level(self, session_client, project):
+        """BUG-04：列表 `level` 取项目桥 ProjectIssueType.level（Epic=1）而非工作区级
+        IssueType.level，工作区级即使被改写也不影响项目语境透出（层级 tab 分组数据源）"""
+        self._enable_project(session_client, project)
+        epic = IssueType.objects.get(workspace=project.workspace, name="Epic", is_epic=True)
+        task = IssueType.objects.get(workspace=project.workspace, name="Task", is_epic=False)
+        # 模拟 WEB seed 的偏差形态：工作区级 level 与桥 level 不一致（桥=正确源）
+        IssueType.objects.filter(pk=epic.pk).update(level=0)
+        IssueType.objects.filter(pk=task.pk).update(level=2)
+
+        response = session_client.get(self._types_url(project))
+        assert response.status_code == status.HTTP_200_OK
+        by_name = {item["name"]: item for item in response.data}
+        assert by_name["Epic"]["level"] == 1  # 桥 level（enable 流写入 Epic=1）
+        assert by_name["Task"]["level"] == 0
+        # 桥 level 优先排序（层级升序），Epic 排最后（level=1）
+        # PK 字段返回 UUID 对象（渲染前数据），统一 str 对比
+        assert str(response.data[-1]["id"]) == str(epic.id)
+
 
 class TestWorkItemTypeMarkDefault:
     """A-6 未激活设默认 400 / A-9 唯一默认"""

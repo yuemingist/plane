@@ -12,6 +12,8 @@
 约定（防后人误用）：
 - 项目内默认类型以 `ProjectIssueType.is_default`（项目桥）为准；
   `IssueType.is_default`（工作区级字段）本步不消费。
+- 层级同理：列表/详情透出的 `level` 取项目桥 `ProjectIssueType.level`
+  （enable 流写入 Epic=1、Task=0）；工作区级 `IssueType.level` 本库全 0，不作为展示源（BUG-04）。
 - 启用为单向开关：enable 幂等（已启用直接返回现状，不报错、不重复建类型）。
 """
 
@@ -78,12 +80,20 @@ class WorkItemTypeViewSet(WorkItemTypeFeatureGateMixin, BaseViewSet):
         )
 
     def _annotated_queryset(self, project_id):
-        """附加项目桥默认标记与引用计数（「特性」列数据源，R3：每项目类型数 <=10）。"""
+        """附加项目桥默认标记、层级与引用计数（「特性」列数据源，R3：每项目类型数 <=10）。"""
         default_subquery = ProjectIssueType.objects.filter(
             issue_type=OuterRef("pk"),
             project_id=project_id,
             deleted_at__isnull=True,
         ).values("is_default")[:1]
+
+        # BUG-04：层级以项目桥 ProjectIssueType.level 为准（enable 流写入 Epic=1），
+        # 工作区级 IssueType.level 本库全 0，透出会导致层级 tab 塌成单行
+        level_subquery = ProjectIssueType.objects.filter(
+            issue_type=OuterRef("pk"),
+            project_id=project_id,
+            deleted_at__isnull=True,
+        ).values("level")[:1]
 
         issues_count_subquery = (
             Issue.issue_objects.filter(type_id=OuterRef("pk"), project_id=project_id)
@@ -99,8 +109,9 @@ class WorkItemTypeViewSet(WorkItemTypeFeatureGateMixin, BaseViewSet):
                 project_issue_types__deleted_at__isnull=True,
             )
             .annotate(project_is_default=Subquery(default_subquery, output_field=BooleanField()))
+            .annotate(project_level=Subquery(level_subquery, output_field=IntegerField()))
             .annotate(project_issues_count=Subquery(issues_count_subquery, output_field=IntegerField()))
-            .order_by("level", "name")
+            .order_by("project_level", "name")
         )
 
     def _get_annotated_instance(self, project_id, pk):

@@ -19,8 +19,11 @@ type THierarchyTabProps = {
 /**
  * Hierarchy tab — read-only visualization ("Level 1: Epic → Level 0: Task / custom types").
  * Grouping follows the cloud shape (BUG-04): the top row is the `is_epic` types (labeled with
- * their level), the bottom row is everything else. Level editing is intentionally not
- * implemented in this step; the chips are static (no edit controls on hover/click).
+ * their level), the bottom row is everything else. `level` here is the project-scoped value
+ * (bridge `ProjectIssueType.level`, Epic=1) that the settings type API exposes since the
+ * 2026-11-16 second-round fix; the workspace-level `IssueType.level` column is all 0 and is
+ * no longer the display source. Level editing is intentionally not implemented in this step;
+ * the chips are static (no edit controls on hover/click).
  */
 export const HierarchyTab = observer(function HierarchyTab(props: THierarchyTabProps) {
   const { projectId } = props;

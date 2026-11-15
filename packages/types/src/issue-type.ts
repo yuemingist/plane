@@ -14,6 +14,7 @@ export interface IIssueType {
   logo_props: TLogoProps | undefined;
   is_epic: boolean;
   is_active: boolean;
+  /** project-scoped level (bridge `ProjectIssueType.level`, Epic=1) exposed by the settings type API; the workspace-level column is not consumed (BUG-04) */
   level: number;
   /** project-scoped computed flag: whether this type is the project's default (bridge) */
   is_default: boolean;

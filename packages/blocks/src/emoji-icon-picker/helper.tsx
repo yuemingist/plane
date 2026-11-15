@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+/* oxlint-disable no-shadow, unicorn/consistent-function-scoping -- 上游既有命名与内嵌函数，本次仅改 stringToEmoji */
+
 export type ChangeHandlerPayload =
   | {
       type: "emoji";
@@ -115,11 +117,15 @@ export function emojiToString(emoji: string): string {
 
 /**
  * Converts string representation back to emoji
- * @param emojiString - Comma-separated string of decimal values
+ * @param emojiString - Dash-separated string of decimal values, or a raw emoji glyph
  * @returns The reconstructed emoji string
  */
 export function stringToEmoji(emojiString: string): string {
   if (!emojiString) return "";
+  // Raw emoji glyphs (e.g. backend seeds store the literal character "🏔" instead of the
+  // decimal format) pass through unchanged (BUG-07); the dash-separated decimal code point
+  // storage format produced by `emojiToString` is still decoded below.
+  if (/[^\d\s-]/.test(emojiString)) return emojiString;
   const decimals = emojiString
     .split("-")
     .map((s) => Number(s.trim()))
