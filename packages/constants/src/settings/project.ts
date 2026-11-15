@@ -86,6 +86,13 @@ export const PROJECT_SETTINGS: Record<TProjectSettingsTabs, TProjectSettingsItem
     access: [EUserProjectRoles.ADMIN, EUserProjectRoles.MEMBER],
     highlight: (pathname: string, baseUrl: string) => pathname === `${baseUrl}/states/`,
   },
+  work_item_types: {
+    key: "work_item_types",
+    i18n_label: "work_item_types.label",
+    href: `/work-item-types`,
+    access: [EUserProjectRoles.ADMIN, EUserProjectRoles.MEMBER],
+    highlight: (pathname: string, baseUrl: string) => pathname.startsWith(`${baseUrl}/work-item-types/`),
+  },
   labels: {
     key: "labels",
     i18n_label: "common.labels",
@@ -121,6 +128,7 @@ export const GROUPED_PROJECT_SETTINGS: Record<PROJECT_SETTINGS_CATEGORY, TProjec
     PROJECT_SETTINGS["features_intake"],
   ],
   [PROJECT_SETTINGS_CATEGORY.WORK_STRUCTURE]: [
+    PROJECT_SETTINGS["work_item_types"],
     PROJECT_SETTINGS["states"],
     PROJECT_SETTINGS["labels"],
     PROJECT_SETTINGS["estimates"],

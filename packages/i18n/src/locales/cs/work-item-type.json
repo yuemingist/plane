@@ -228,8 +228,10 @@
         },
         "empty_state": {
           "title": "Přidat vlastní vlastnosti",
-          "description": "Nové vlastnosti, které přidáte pro tento typ pracovních položek, se zde zobrazí."
-        }
+          "description": "Nové vlastnosti, které přidáte pro tento typ pracovních položek, se zde zobrazí.",
+          "no_properties_description": "No custom properties added yet: define properties to track specific data for this work item type."
+        },
+        "coming_soon_badge": "Coming soon"
       },
       "types": {
         "title": "Typy",
@@ -250,6 +252,11 @@
             "with_access": "Povolte typy pracovních položek pro import typů z úrovně pracovního prostoru",
             "without_access": "Typy pracovních položek jsou zakázány. Kontaktujte správce pracovního prostoru, aby je povolil v nastavení pracovního prostoru."
           }
+        },
+        "count_label": "Types {count}",
+        "table": {
+          "status_column": "Status",
+          "work_items_count_column": "Features"
         }
       },
       "linked_properties": {
@@ -290,6 +297,12 @@
           "cannot_delete_default_work_item_type": "Výchozí typ pracovní položky nelze odstranit",
           "cannot_delete_work_item_type_with_associated_work_items": "Typ pracovní položky s přidruženými pracovními položkami nelze odstranit"
         }
+      },
+      "subtitle": "Work item types help you organize work in your project (Bug, Feature, Task) and define which fields each type includes.",
+      "work_item_type_column": "Work item type",
+      "enable_success_toast": {
+        "title": "Success!",
+        "message": "Work item types have been enabled successfully."
       }
     },
     "create": {
@@ -388,7 +401,8 @@
           "text": "Upgradovat"
         }
       }
-    }
+    },
+    "switch_entry": "Switch work item type"
   },
   "work_item_type_hierarchy": {
     "settings": {
@@ -404,7 +418,9 @@
       "workspace_work_item_types_disabled_banner": {
         "content": "Nejprve definujte typy pracovních položek pro vytvoření nové hierarchie.",
         "cta": "Nastavení typů pracovních položek"
-      }
+      },
+      "readonly_description": "Control how work items nest within each other, how many levels deep nesting can go, and which types can sit under which.",
+      "level_label": "Level {level}"
     },
     "levels": {
       "max_level_placeholder": "Přetáhněte typ pro přidání nové úrovně hierarchie",

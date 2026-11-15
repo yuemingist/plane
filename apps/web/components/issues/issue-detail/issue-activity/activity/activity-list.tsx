@@ -30,6 +30,7 @@ import {
   IssueAttachmentActivity,
   IssueArchivedAtActivity,
   IssueInboxActivity,
+  IssueTypeActivity,
 } from "./actions";
 
 type TIssueActivityItem = {
@@ -70,6 +71,8 @@ export const IssueActivityItem = observer(function IssueActivityItem(props: TIss
       return <IssueEstimateActivity {...componentDefaultProps} showIssue={false} />;
     case "parent":
       return <IssueParentActivity {...componentDefaultProps} showIssue={false} />;
+    case "type":
+      return <IssueTypeActivity {...componentDefaultProps} showIssue={false} />;
     case activityRelations.find((field) => field === activityField):
       return <IssueRelationActivity {...componentDefaultProps} />;
     case "start_date":

@@ -35,9 +35,9 @@ export const StateQuickActions = observer(function StateQuickActions(props: TSta
   // derived values
   const isDeleteDisabled = !!state.default || totalStates === 1;
   const deleteDisabledReason = state.default
-    ? "Cannot delete the default state."
+    ? t("project_settings.states.cannot_delete_default")
     : totalStates === 1
-      ? "Cannot have an empty group."
+      ? t("project_settings.states.cannot_have_empty_group")
       : undefined;
 
   const handleMarkAsDefault = async () => {
@@ -104,7 +104,7 @@ export const StateQuickActions = observer(function StateQuickActions(props: TSta
           {!state.default && (
             <MenuItem
               icon={<Icon icon={DefaultTabOutline} />}
-              label={isMarkingAsDefault ? "Marking as default" : "Mark as default"}
+              label={t("project_settings.states.set_as_default")}
               disabled={isMarkingAsDefault}
               onClick={() => void handleMarkAsDefault()}
             />

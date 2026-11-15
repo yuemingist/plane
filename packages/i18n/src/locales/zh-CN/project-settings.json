@@ -44,12 +44,16 @@
     },
     "states": {
       "heading": "状态",
-      "description": "定义和自定义工作流状态以跟踪工作项的进度。",
+      "description": "状态显示每个工作项从开始到完成所处的生命周期位置。可为本项目自定义。",
       "describe_this_state_for_your_members": "为您的成员描述此状态。",
       "empty_state": {
         "title": "{groupKey} 组中没有状态",
         "description": "请创建一个新状态"
-      }
+      },
+      "cannot_delete_default": "无法删除默认状态。",
+      "set_as_default": "设为默认",
+      "state_name_placeholder": "State name",
+      "cannot_have_empty_group": "组不能为空。"
     },
     "labels": {
       "heading": "标签",

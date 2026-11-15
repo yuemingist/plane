@@ -162,6 +162,8 @@ import {
   User,
   Sigma,
 } from "lucide-react";
+import { icons as lucideIconRegistry } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { EpicOutline } from "@makeplane/propel/icons";
 
 export const LUCIDE_ICONS_LIST = [
@@ -323,3 +325,18 @@ export const LUCIDE_ICONS_LIST = [
   { name: "User", element: User },
   { name: "UsersRound", element: UsersRound },
 ];
+
+/**
+ * Resolves a kebab/snake-case icon name against the full lucide registry
+ * ("mountain" -> Mountain). Returns undefined for names lucide does not ship.
+ * Used to render logo_props icon names that are outside the curated picker list
+ * above (e.g. backend seeds), so they don't collapse to a blank box.
+ */
+export const getLucideIconElementByName = (name: string): LucideIcon | undefined => {
+  if (!name) return undefined;
+  const pascalName = name
+    .split(/[-_]/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
+  return (lucideIconRegistry as unknown as Record<string, LucideIcon | undefined>)[pascalName];
+};

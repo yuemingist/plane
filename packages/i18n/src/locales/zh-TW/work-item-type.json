@@ -228,8 +228,10 @@
         },
         "empty_state": {
           "title": "添加自定義屬性",
-          "description": "您為此工作項目類型添加的新屬性將顯示在此處。"
-        }
+          "description": "您為此工作項目類型添加的新屬性將顯示在此處。",
+          "no_properties_description": "No custom properties added yet: define properties to track specific data for this work item type."
+        },
+        "coming_soon_badge": "Coming soon"
       },
       "types": {
         "title": "類型",
@@ -250,6 +252,11 @@
             "with_access": "啟用工作事項類型以從工作區層級匯入類型",
             "without_access": "工作事項類型已停用。請聯絡工作區管理員在工作區設定中啟用。"
           }
+        },
+        "count_label": "Types {count}",
+        "table": {
+          "status_column": "Status",
+          "work_items_count_column": "Features"
         }
       },
       "linked_properties": {
@@ -290,6 +297,12 @@
           "cannot_delete_default_work_item_type": "無法刪除預設工作項目類型",
           "cannot_delete_work_item_type_with_associated_work_items": "無法刪除具有關聯工作項目的工作項目類型"
         }
+      },
+      "subtitle": "Work item types help you organize work in your project (Bug, Feature, Task) and define which fields each type includes.",
+      "work_item_type_column": "Work item type",
+      "enable_success_toast": {
+        "title": "Success!",
+        "message": "Work item types have been enabled successfully."
       }
     },
     "create": {
@@ -388,7 +401,8 @@
           "text": "升級"
         }
       }
-    }
+    },
+    "switch_entry": "Switch work item type"
   },
   "work_item_type_hierarchy": {
     "settings": {
@@ -404,7 +418,9 @@
       "workspace_work_item_types_disabled_banner": {
         "content": "請先定義工作項目類型，再建立新的層級。",
         "cta": "工作項目類型設定"
-      }
+      },
+      "readonly_description": "Control how work items nest within each other, how many levels deep nesting can go, and which types can sit under which.",
+      "level_label": "Level {level}"
     },
     "levels": {
       "max_level_placeholder": "拖放類型以新增階層",

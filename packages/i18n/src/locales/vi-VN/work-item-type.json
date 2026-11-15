@@ -228,8 +228,10 @@
         },
         "empty_state": {
           "title": "Thêm thuộc tính tùy chỉnh",
-          "description": "Các thuộc tính mới bạn thêm cho loại mục công việc này sẽ hiển thị ở đây."
-        }
+          "description": "Các thuộc tính mới bạn thêm cho loại mục công việc này sẽ hiển thị ở đây.",
+          "no_properties_description": "No custom properties added yet: define properties to track specific data for this work item type."
+        },
+        "coming_soon_badge": "Coming soon"
       },
       "types": {
         "title": "Loại",
@@ -250,6 +252,11 @@
             "with_access": "Bật loại mục công việc để nhập các loại từ cấp không gian làm việc",
             "without_access": "Loại mục công việc đã bị tắt. Liên hệ quản trị viên không gian làm việc để bật trong cài đặt không gian làm việc."
           }
+        },
+        "count_label": "Types {count}",
+        "table": {
+          "status_column": "Status",
+          "work_items_count_column": "Features"
         }
       },
       "linked_properties": {
@@ -290,6 +297,12 @@
           "cannot_delete_default_work_item_type": "Không thể xóa loại mục công việc mặc định",
           "cannot_delete_work_item_type_with_associated_work_items": "Không thể xóa loại mục công việc có mục công việc liên quan"
         }
+      },
+      "subtitle": "Work item types help you organize work in your project (Bug, Feature, Task) and define which fields each type includes.",
+      "work_item_type_column": "Work item type",
+      "enable_success_toast": {
+        "title": "Success!",
+        "message": "Work item types have been enabled successfully."
       }
     },
     "create": {
@@ -388,7 +401,8 @@
           "text": "Nâng cấp"
         }
       }
-    }
+    },
+    "switch_entry": "Switch work item type"
   },
   "work_item_type_hierarchy": {
     "settings": {
@@ -404,7 +418,9 @@
       "workspace_work_item_types_disabled_banner": {
         "content": "Trước tiên hãy xác định các Loại Mục Công Việc để tạo phân cấp mới.",
         "cta": "Cài đặt loại mục công việc"
-      }
+      },
+      "readonly_description": "Control how work items nest within each other, how many levels deep nesting can go, and which types can sit under which.",
+      "level_label": "Level {level}"
     },
     "levels": {
       "max_level_placeholder": "Kéo và thả loại để thêm cấp phân cấp mới",

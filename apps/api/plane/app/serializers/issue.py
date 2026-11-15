@@ -21,6 +21,7 @@ from plane.db.models import (
     User,
     Issue,
     IssueActivity,
+    IssueType,
     IssueComment,
     ProjectUserProperty,
     IssueAssignee,
@@ -42,6 +43,7 @@ from plane.db.models import (
     IssueDescriptionVersion,
     ProjectMember,
     EstimatePoint,
+    ProjectIssueType,
 )
 from plane.utils.content_validator import (
     validate_html_content,
@@ -99,6 +101,11 @@ class IssueCreateSerializer(BaseSerializer):
     )
     project_id = serializers.UUIDField(source="project.id", read_only=True)
     workspace_id = serializers.UUIDField(source="workspace.id", read_only=True)
+    # 工作项类型写入别名：app 端 PATCH/POST 用 `type_id`（对齐外部 API 键名与 18-01 规格草案）；
+    # 旧键 `type`（fields="__all__" 生成的 FK 字段）继续可用
+    type_id = serializers.PrimaryKeyRelatedField(
+        source="type", queryset=IssueType.objects.all(), required=False, allow_null=True
+    )
 
     class Meta:
         model = Issue
@@ -203,6 +210,18 @@ class IssueCreateSerializer(BaseSerializer):
             ).exists()
         ):
             raise serializers.ValidationError("Estimate point is not valid please pass a valid estimate_point_id")
+
+        # Check work item type is bound to the project only else raise validation error
+        # (项目桥绑定校验：类型必须已挂到该项目，防止跨项目赋类型)
+        requested_type = attrs.get("type") or attrs.get("type_id")
+        if requested_type and not ProjectIssueType.objects.filter(
+            project_id=self.context.get("project_id"),
+            issue_type_id=requested_type.id,
+            deleted_at__isnull=True,
+        ).exists():
+            raise serializers.ValidationError(
+                "Work item type is not valid please pass a valid type_id bound to the project"
+            )
 
         return attrs
 
@@ -791,6 +810,9 @@ class IssueSerializer(DynamicBaseSerializer):
     attachment_count = serializers.IntegerField(read_only=True)
     link_count = serializers.IntegerField(read_only=True)
 
+    # 工作项类型（Step01 追赶 BE-3）：列表/详情读模型输出 type_id（列表类型列/详情 chip 数据源）
+    type_id = serializers.PrimaryKeyRelatedField(source="type", read_only=True)
+
     class Meta:
         model = Issue
         fields = [
@@ -806,6 +828,7 @@ class IssueSerializer(DynamicBaseSerializer):
             "sequence_id",
             "project_id",
             "parent_id",
+            "type_id",
             "cycle_id",
             "module_ids",
             "label_ids",
@@ -863,6 +886,8 @@ class IssueListDetailSerializer(serializers.Serializer):
             "sequence_id": instance.sequence_id,
             "project_id": instance.project_id,
             "parent_id": instance.parent_id,
+            # 工作项类型（Step01 追赶 BE-3）：列表类型列/详情 chip 数据源
+            "type_id": instance.type_id,
             "created_at": instance.created_at,
             "updated_at": instance.updated_at,
             "created_by": instance.created_by_id,

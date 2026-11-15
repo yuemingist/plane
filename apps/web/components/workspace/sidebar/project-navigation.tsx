@@ -4,14 +4,17 @@
  * See the LICENSE file for details.
  */
 
+/* oxlint-disable no-shadow, unicorn/no-array-sort -- 上游既有命名与排序写法，本次仅追加 epics 导航项 */
 import React, { useCallback, useMemo } from "react";
 import { observer } from "mobx-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+import useSWR from "swr";
 import { EUserPermissionsLevel, EUserPermissions } from "@plane/constants";
 import { useTranslation } from "@plane/i18n";
 import {
   CyclesOutline,
+  EpicOutline,
   IntakeOutline,
   ModuleOutline,
   PagesOutline,
@@ -26,6 +29,7 @@ import { ListItemLink } from "@makeplane/propel/elements/list";
 // hooks
 import { useAppTheme } from "@/hooks/store/use-app-theme";
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
+import { useIssueType } from "@/hooks/store/use-issue-type";
 import { useProject } from "@/hooks/store/use-project";
 import { useUserPermissions } from "@/hooks/store/user";
 
@@ -47,6 +51,7 @@ type TProjectItemsProps = {
 };
 
 export const ProjectNavigation = observer(function ProjectNavigation(props: TProjectItemsProps) {
+  // oxlint-disable-next-line no-shadow -- 上游既有解构签名
   const { workspaceSlug, projectId, additionalNavigationItems } = props;
   const { workItem: workItemIdentifierFromRoute } = useParams();
   // store hooks
@@ -54,6 +59,7 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
   const { isExtendedProjectSidebarOpened, toggleExtendedProjectSidebar, toggleSidebar } = useAppTheme();
   const { getPartialProjectById } = useProject();
   const { allowPermissions } = useUserPermissions();
+  const { hasEpicType, areTypesFetched, fetchProjectWorkItemTypes } = useIssueType();
   const {
     issue: { getIssueIdByIdentifier, getIssueById },
   } = useIssueDetail();
@@ -76,6 +82,20 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
     }
   };
 
+  // the Epics nav item needs the project's type list to evaluate `hasEpicType`;
+  // fetch it once when the project has work item types enabled (BUG-05 ②)
+  useSWR(
+    workspaceSlug && projectId && project?.is_issue_type_enabled
+      ? `PROJECT_WORK_ITEM_TYPES_${workspaceSlug}_${projectId}`
+      : null,
+    async () => {
+      if (workspaceSlug && projectId && !areTypesFetched(projectId)) {
+        await fetchProjectWorkItemTypes(workspaceSlug, projectId);
+      }
+    },
+    { revalidateIfStale: false, revalidateOnFocus: false }
+  );
+
   const baseNavigation = useCallback(
     (workspaceSlug: string, projectId: string): TNavigationItem[] => [
       {
@@ -89,6 +109,19 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
         sortOrder: 1,
       },
       {
+        // Epic layout entry point (BUG-05 ②): shown as soon as the project has work item types
+        // enabled; hidden only once the type list is loaded and no active `is_epic` type exists
+        // (口径与 use-navigation-items.ts / 页头布局入口一致，产品方案 §5.1)
+        i18n_key: "sidebar.epics",
+        key: "epics",
+        name: "Epics",
+        href: `/${workspaceSlug}/projects/${projectId}/epics`,
+        icon: EpicOutline,
+        access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
+        shouldRender: !!project?.is_issue_type_enabled && (!areTypesFetched(projectId) || hasEpicType(projectId)),
+        sortOrder: 2,
+      },
+      {
         i18n_key: "sidebar.cycles",
         key: "cycles",
         name: "Cycles",
@@ -96,7 +129,7 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
         icon: CyclesOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
         shouldRender: project?.cycle_view ?? false,
-        sortOrder: 2,
+        sortOrder: 3,
       },
       {
         i18n_key: "sidebar.modules",
@@ -106,7 +139,7 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
         icon: ModuleOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
         shouldRender: project?.module_view ?? false,
-        sortOrder: 3,
+        sortOrder: 4,
       },
       {
         i18n_key: "sidebar.views",
@@ -116,7 +149,7 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
         icon: ViewsOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
         shouldRender: project?.issue_views_view ?? false,
-        sortOrder: 4,
+        sortOrder: 5,
       },
       {
         i18n_key: "sidebar.pages",
@@ -126,7 +159,7 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
         icon: PagesOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
         shouldRender: project?.page_view ?? false,
-        sortOrder: 5,
+        sortOrder: 6,
       },
       {
         i18n_key: "sidebar.intake",
@@ -136,10 +169,10 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
         icon: IntakeOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
         shouldRender: project?.inbox_view ?? false,
-        sortOrder: 6,
+        sortOrder: 7,
       },
     ],
-    [project]
+    [project, hasEpicType, areTypesFetched, projectId]
   );
 
   // memoized navigation items and adding additional navigation items

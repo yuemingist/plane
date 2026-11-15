@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { observer } from "mobx-react";
 import { setToast } from "@plane/blocks/toast";
+import { useTranslation } from "@plane/i18n";
 import type { IState, TStateOperationsCallbacks } from "@plane/types";
 // components
 import { StateForm } from "@/components/project-states";
@@ -19,6 +20,8 @@ type TStateUpdate = {
 
 export const StateUpdate = observer(function StateUpdate(props: TStateUpdate) {
   const { state, updateStateCallback, handleClose } = props;
+  // plane hooks
+  const { t } = useTranslation();
   // states
   const [loader, setLoader] = useState(false);
 
@@ -65,7 +68,7 @@ export const StateUpdate = observer(function StateUpdate(props: TStateUpdate) {
       onSubmit={onSubmit}
       onCancel={onCancel}
       buttonDisabled={loader}
-      buttonTitle={loader ? `Updating` : `Update`}
+      buttonTitle={t("common.update")}
     />
   );
 });

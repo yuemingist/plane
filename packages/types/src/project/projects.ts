@@ -31,6 +31,8 @@ export interface IPartialProject {
   page_view: boolean;
   inbox_view: boolean;
   guest_view_all_features?: boolean;
+  /** one-way gate for the work item types module (mirrors Project.is_issue_type_enabled) */
+  is_issue_type_enabled?: boolean;
   project_lead?: IUserLite | string | null;
   network?: number;
   // Timestamps

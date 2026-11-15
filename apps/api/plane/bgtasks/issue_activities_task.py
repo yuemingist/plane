@@ -25,6 +25,7 @@ from plane.db.models import (
     IssueComment,
     IssueReaction,
     IssueSubscriber,
+    IssueType,
     Label,
     Module,
     Project,
@@ -162,6 +163,62 @@ def track_parent(
                 comment="updated the parent issue to",
                 old_identifier=(old_parent.id if old_parent is not None else None),
                 new_identifier=(new_parent.id if new_parent is not None else None),
+                epoch=epoch,
+            )
+        )
+
+
+# Track changes in work item type (Step01 追赶 BE-3)
+# 文案对齐云端：changed work item type to {new} from {old}（产品方案 §4 #7，云端英文原样不翻译）
+def track_type(
+    requested_data,
+    current_instance,
+    issue_id,
+    project_id,
+    workspace_id,
+    actor_id,
+    issue_activities,
+    epoch,
+):
+    # app 端写入键为 `type`（fields="__all__" 的 FK）或 `type_id`（本步新增别名），
+    # 读模型 current_instance 输出键为 `type_id`——两个键都兜住（参照 track_parent 双键写法）
+    current_type_id = current_instance.get("type_id") or current_instance.get("type")
+    requested_type_id = requested_data.get("type_id") or requested_data.get("type")
+
+    # Validate UUIDs before database queries
+    if current_type_id is not None and not is_valid_uuid(current_type_id):
+        return
+    if requested_type_id is not None and not is_valid_uuid(requested_type_id):
+        return
+
+    if current_type_id != requested_type_id:
+        type_ids = [str(x) for x in (current_type_id, requested_type_id) if x is not None]
+        # 名称解析：跨请求查 IssueType；已删类型兜底显示 UUID 前缀（R6）。
+        # 注意 in_bulk 返回的字典键是 UUID 对象，这里统一转成 str 键再查
+        types_by_id = {
+            str(pk): issue_type for pk, issue_type in IssueType.objects.in_bulk(type_ids).items()
+        }
+
+        def _type_name(type_id):
+            if type_id is None:
+                return ""
+            issue_type = types_by_id.get(str(type_id))
+            return issue_type.name if issue_type is not None else f"{str(type_id)[:8]}…"
+
+        old_name = _type_name(current_type_id)
+        new_name = _type_name(requested_type_id)
+
+        issue_activities.append(
+            IssueActivity(
+                issue_id=issue_id,
+                actor_id=actor_id,
+                verb="updated",
+                old_value=old_name,
+                new_value=new_name,
+                field="type",
+                project_id=project_id,
+                workspace_id=workspace_id,
+                comment=f"changed work item type to {new_name} from {old_name}",
                 epoch=epoch,
             )
         )
@@ -651,6 +708,9 @@ def update_issue_activity(
         "state": track_state,
         "assignees": track_assignees,
         "labels": track_labels,
+        # Work item type（Step01 追赶 BE-3）：app 端写键 `type` / `type_id` 双键对齐
+        "type": track_type,
+        "type_id": track_type,
     }
 
     requested_data = json.loads(requested_data) if requested_data is not None else None

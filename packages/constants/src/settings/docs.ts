@@ -11,6 +11,7 @@ export const SETTINGS_DOCS_URLS = {
   webhooks: "https://docs.plane.so/dev-tools/intro-webhooks",
   // project
   states: "https://docs.plane.so/core-concepts/issues/states",
+  work_item_types: "https://docs.plane.so/core-concepts/issues/issue-types",
   labels: "https://docs.plane.so/core-concepts/issues/labels",
   estimates: "https://docs.plane.so/core-concepts/issues/estimates",
   cycles: "https://docs.plane.so/core-concepts/cycles",

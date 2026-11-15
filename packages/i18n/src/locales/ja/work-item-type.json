@@ -228,8 +228,10 @@
         },
         "empty_state": {
           "title": "カスタムプロパティを追加",
-          "description": "この作業項目タイプに追加する新しいプロパティがここに表示されます。"
-        }
+          "description": "この作業項目タイプに追加する新しいプロパティがここに表示されます。",
+          "no_properties_description": "No custom properties added yet: define properties to track specific data for this work item type."
+        },
+        "coming_soon_badge": "Coming soon"
       },
       "types": {
         "title": "タイプ",
@@ -250,6 +252,11 @@
             "with_access": "ワークスペースレベルからタイプをインポートするには、作業項目タイプを有効にしてください",
             "without_access": "作業項目タイプは無効になっています。ワークスペース管理者に連絡して、ワークスペース設定で有効にしてもらってください。"
           }
+        },
+        "count_label": "Types {count}",
+        "table": {
+          "status_column": "Status",
+          "work_items_count_column": "Features"
         }
       },
       "linked_properties": {
@@ -290,6 +297,12 @@
           "cannot_delete_default_work_item_type": "デフォルトの作業項目タイプは削除できません",
           "cannot_delete_work_item_type_with_associated_work_items": "関連する作業項目がある作業項目タイプは削除できません"
         }
+      },
+      "subtitle": "Work item types help you organize work in your project (Bug, Feature, Task) and define which fields each type includes.",
+      "work_item_type_column": "Work item type",
+      "enable_success_toast": {
+        "title": "Success!",
+        "message": "Work item types have been enabled successfully."
       }
     },
     "create": {
@@ -388,7 +401,8 @@
           "text": "アップグレード"
         }
       }
-    }
+    },
+    "switch_entry": "Switch work item type"
   },
   "work_item_type_hierarchy": {
     "settings": {
@@ -404,7 +418,9 @@
       "workspace_work_item_types_disabled_banner": {
         "content": "新しい階層を作成するには、まず作業項目タイプを定義してください。",
         "cta": "作業項目タイプの設定"
-      }
+      },
+      "readonly_description": "Control how work items nest within each other, how many levels deep nesting can go, and which types can sit under which.",
+      "level_label": "Level {level}"
     },
     "levels": {
       "max_level_placeholder": "新しい階層レベルを追加するには、タイプをドラッグ＆ドロップしてください",

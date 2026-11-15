@@ -228,8 +228,10 @@
         },
         "empty_state": {
           "title": "Agregar propiedades personalizadas",
-          "description": "Las nuevas propiedades que agregues para este tipo de elemento de trabajo aparecerán aquí."
-        }
+          "description": "Las nuevas propiedades que agregues para este tipo de elemento de trabajo aparecerán aquí.",
+          "no_properties_description": "No custom properties added yet: define properties to track specific data for this work item type."
+        },
+        "coming_soon_badge": "Coming soon"
       },
       "types": {
         "title": "Tipos",
@@ -250,6 +252,11 @@
             "with_access": "Habilita los tipos de elementos de trabajo para importar tipos desde el nivel del espacio de trabajo",
             "without_access": "Los tipos de elementos de trabajo están deshabilitados. Contacta al administrador del espacio de trabajo para habilitarlos en la configuración del espacio de trabajo."
           }
+        },
+        "count_label": "Types {count}",
+        "table": {
+          "status_column": "Status",
+          "work_items_count_column": "Features"
         }
       },
       "linked_properties": {
@@ -290,6 +297,12 @@
           "cannot_delete_default_work_item_type": "No se puede eliminar el tipo de elemento de trabajo predeterminado",
           "cannot_delete_work_item_type_with_associated_work_items": "No se puede eliminar el tipo de elemento de trabajo con elementos de trabajo asociados"
         }
+      },
+      "subtitle": "Work item types help you organize work in your project (Bug, Feature, Task) and define which fields each type includes.",
+      "work_item_type_column": "Work item type",
+      "enable_success_toast": {
+        "title": "Success!",
+        "message": "Work item types have been enabled successfully."
       }
     },
     "create": {
@@ -388,7 +401,8 @@
           "text": "Actualizar"
         }
       }
-    }
+    },
+    "switch_entry": "Switch work item type"
   },
   "work_item_type_hierarchy": {
     "settings": {
@@ -404,7 +418,9 @@
       "workspace_work_item_types_disabled_banner": {
         "content": "Define primero los tipos de elementos de trabajo para crear una nueva jerarquía.",
         "cta": "Configuración de tipos de elementos de trabajo"
-      }
+      },
+      "readonly_description": "Control how work items nest within each other, how many levels deep nesting can go, and which types can sit under which.",
+      "level_label": "Level {level}"
     },
     "levels": {
       "max_level_placeholder": "Arrastra y suelta un tipo para añadir un nuevo nivel de jerarquía",

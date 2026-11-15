@@ -140,6 +140,13 @@ export const coreRoutes: RouteConfigEntry[] = [
               "./(all)/[workspaceSlug]/(projects)/projects/(detail)/[projectId]/issues/(list)/page.tsx"
             ),
           ]),
+          // Project Epics List
+          layout("./(all)/[workspaceSlug]/(projects)/projects/(detail)/[projectId]/epics/(list)/layout.tsx", [
+            route(
+              ":workspaceSlug/projects/:projectId/epics",
+              "./(all)/[workspaceSlug]/(projects)/projects/(detail)/[projectId]/epics/(list)/page.tsx"
+            ),
+          ]),
           // Issue Detail
           route(
             ":workspaceSlug/projects/:projectId/issues/:issueId",
@@ -327,6 +334,15 @@ export const coreRoutes: RouteConfigEntry[] = [
             route(
               ":workspaceSlug/settings/projects/:projectId/states",
               "./(all)/[workspaceSlug]/(settings)/settings/projects/[projectId]/states/page.tsx"
+            ),
+            // Project Work Item Types
+            route(
+              ":workspaceSlug/settings/projects/:projectId/work-item-types",
+              "./(all)/[workspaceSlug]/(settings)/settings/projects/[projectId]/work-item-types/page.tsx"
+            ),
+            route(
+              ":workspaceSlug/settings/projects/:projectId/work-item-types/types/:typeId",
+              "./(all)/[workspaceSlug]/(settings)/settings/projects/[projectId]/work-item-types/types/[typeId]/page.tsx"
             ),
             // Project Labels
             route(

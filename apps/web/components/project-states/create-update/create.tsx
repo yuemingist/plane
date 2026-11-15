@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { observer } from "mobx-react";
 import { STATE_GROUPS } from "@plane/constants";
+import { useTranslation } from "@plane/i18n";
 import { setToast } from "@plane/blocks/toast";
 import type { IState, TStateGroups, TStateOperationsCallbacks } from "@plane/types";
 // components
@@ -20,6 +21,8 @@ type TStateCreate = {
 
 export const StateCreate = observer(function StateCreate(props: TStateCreate) {
   const { groupKey, createStateCallback, handleClose } = props;
+  // plane hooks
+  const { t } = useTranslation();
 
   // states
   const [loader, setLoader] = useState(false);
@@ -68,7 +71,7 @@ export const StateCreate = observer(function StateCreate(props: TStateCreate) {
       onSubmit={onSubmit}
       onCancel={onCancel}
       buttonDisabled={loader}
-      buttonTitle={loader ? `Creating` : `Create`}
+      buttonTitle={t("common.create")}
     />
   );
 });

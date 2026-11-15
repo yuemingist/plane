@@ -228,8 +228,10 @@
         },
         "empty_state": {
           "title": "Tambahkan properti kustom",
-          "description": "Properti baru yang Anda tambahkan untuk tipe item kerja ini akan ditampilkan di sini."
-        }
+          "description": "Properti baru yang Anda tambahkan untuk tipe item kerja ini akan ditampilkan di sini.",
+          "no_properties_description": "No custom properties added yet: define properties to track specific data for this work item type."
+        },
+        "coming_soon_badge": "Coming soon"
       },
       "types": {
         "title": "Tipe",
@@ -250,6 +252,11 @@
             "with_access": "Aktifkan tipe item kerja untuk mengimpor tipe dari level ruang kerja",
             "without_access": "Tipe item kerja dinonaktifkan. Hubungi admin ruang kerja untuk mengaktifkannya di pengaturan ruang kerja."
           }
+        },
+        "count_label": "Types {count}",
+        "table": {
+          "status_column": "Status",
+          "work_items_count_column": "Features"
         }
       },
       "linked_properties": {
@@ -290,6 +297,12 @@
           "cannot_delete_default_work_item_type": "Tidak dapat menghapus jenis item kerja default",
           "cannot_delete_work_item_type_with_associated_work_items": "Tidak dapat menghapus jenis item kerja yang memiliki item kerja terkait"
         }
+      },
+      "subtitle": "Work item types help you organize work in your project (Bug, Feature, Task) and define which fields each type includes.",
+      "work_item_type_column": "Work item type",
+      "enable_success_toast": {
+        "title": "Success!",
+        "message": "Work item types have been enabled successfully."
       }
     },
     "create": {
@@ -388,7 +401,8 @@
           "text": "Tingkatkan"
         }
       }
-    }
+    },
+    "switch_entry": "Switch work item type"
   },
   "work_item_type_hierarchy": {
     "settings": {
@@ -404,7 +418,9 @@
       "workspace_work_item_types_disabled_banner": {
         "content": "Tentukan Jenis Item Pekerjaan terlebih dahulu untuk membuat hierarki baru.",
         "cta": "Pengaturan jenis item pekerjaan"
-      }
+      },
+      "readonly_description": "Control how work items nest within each other, how many levels deep nesting can go, and which types can sit under which.",
+      "level_label": "Level {level}"
     },
     "levels": {
       "max_level_placeholder": "Seret dan lepas jenis untuk menambahkan tingkat hierarki baru",
