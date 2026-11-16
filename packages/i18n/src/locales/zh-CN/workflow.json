@@ -44,7 +44,25 @@
         "action": {
           "enabled": "启用了工作流",
           "disabled": "停用了工作流",
-          "re_enabled": "重新启用了工作流"
+          "re_enabled": "重新启用了工作流",
+          "transition_rules_updated": "更新了流转规则"
+        }
+      },
+      "transitions": {
+        "title": "流转规则",
+        "toggle": "展开/收起流转规则",
+        "description": "为每个状态勾选允许移动到的目标状态；未勾选任何目标的状态不受限制（默认全部允许）。",
+        "move_to": "可移动到",
+        "unrestricted": "不受限",
+        "toasts": {
+          "success": {
+            "title": "成功",
+            "message": "流转规则已更新。"
+          },
+          "error": {
+            "title": "错误",
+            "message": "流转规则保存失败，请重试。"
+          }
         }
       }
     },
@@ -143,6 +161,10 @@
           "message": "状态更改规则移交人不能被修改。请重试。"
         }
       }
+    },
+    "transition_rejected_toast": {
+      "title": "无法移动工作项",
+      "message": "受工作流规则限制，不允许从「{from_state}」移动到「{to_state}」。"
     }
   }
 }

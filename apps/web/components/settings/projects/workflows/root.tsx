@@ -141,6 +141,7 @@ export const ProjectWorkflowsRoot = observer(function ProjectWorkflowsRoot(props
       {isEnabled && workflow && (
         <div className="mt-8">
           <WorkflowTable
+            workspaceSlug={workspaceSlug}
             workflow={workflow}
             canPerformActions={canPerformActions}
             onRequestDisable={() => setIsDisableConfirmOpen(true)}
