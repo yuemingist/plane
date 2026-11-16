@@ -163,10 +163,13 @@ class IssueFilterSet(BaseFilterSet):
     state_id__in = UUIDInFilter(field_name="state_id", lookup_expr="in")
 
     # 筛选 Type / Parent type（Step01 追赶 BE-3，B-6/B-7 后端面）：直查 type_id；
-    # parent__type_id 按「父工作项的类型」过滤（Parent type 关系筛选）
+    # parent__type_id 按「父工作项的类型」过滤（Parent type 关系筛选）。
+    # `__in` 形态：前端 rich filters 的多选条件统一发 `<key>__in`（BUG-08 复验补齐，
+    # 缺它时 Parent type 多选下拉会 400 且列表清空）
     type_id = filters.UUIDFilter(field_name="type_id")
     type_id__in = UUIDInFilter(field_name="type_id", lookup_expr="in")
     parent__type_id = filters.UUIDFilter(field_name="parent__type_id")
+    parent__type_id__in = UUIDInFilter(field_name="parent__type_id", lookup_expr="in")
 
     project_id = filters.UUIDFilter(field_name="project_id")
     project_id__in = UUIDInFilter(field_name="project_id", lookup_expr="in")
