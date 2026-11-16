@@ -4,14 +4,18 @@
  * See the LICENSE file for details.
  */
 
+import { useState } from "react";
 import { observer } from "mobx-react";
 // plane imports
 import { useTranslation } from "@plane/i18n";
 import type { IWorkflow } from "@plane/types";
+import { ChevronDownOutline, ChevronRightOutline } from "@makeplane/propel/icons";
 // local imports
 import { WorkflowRowMenu } from "./workflow-row-menu";
+import { WorkflowTransitionsPanel } from "./workflow-transitions-panel";
 
 type TWorkflowTableProps = {
+  workspaceSlug: string;
   workflow: IWorkflow;
   canPerformActions: boolean;
   onRequestDisable: () => void;
@@ -25,7 +29,9 @@ type TWorkflowTableProps = {
  * The row body is intentionally not clickable — the cloud page has no rule editor (58号 §3.6 step 3).
  */
 export const WorkflowTable = observer(function WorkflowTable(props: TWorkflowTableProps) {
-  const { workflow, canPerformActions, onRequestDisable, onRequestHistory } = props;
+  const { workspaceSlug, workflow, canPerformActions, onRequestDisable, onRequestHistory } = props;
+  // states: 行内展开流转规则面板（段 3 CE 设计，云端无对照——产品方案 §2.1）
+  const [isTransitionsOpen, setIsTransitionsOpen] = useState(false);
   // hooks
   const { t } = useTranslation();
 
@@ -64,13 +70,38 @@ export const WorkflowTable = observer(function WorkflowTable(props: TWorkflowTab
           <span className="text-secondary">{t("workflows.settings.table.states.all")}</span>
           {/* work item types coverage */}
           <span className="text-secondary">{t("workflows.settings.table.work_item_types.all")}</span>
-          {/* row menu */}
-          <div className="flex justify-end">
+          {/* row actions: transition-rules expand toggle (segment 3) + row menu */}
+          <div className="flex items-center justify-end gap-1">
+            {canPerformActions && (
+              <button
+                type="button"
+                className="flex size-7 items-center justify-center rounded text-tertiary hover:bg-layer-transparent-hover"
+                aria-label={t("workflows.settings.transitions.toggle")}
+                onClick={() => setIsTransitionsOpen((previous) => !previous)}
+              >
+                {isTransitionsOpen ? (
+                  <ChevronDownOutline className="size-3.5" />
+                ) : (
+                  <ChevronRightOutline className="size-3.5" />
+                )}
+              </button>
+            )}
             {canPerformActions && (
               <WorkflowRowMenu onRequestDisable={onRequestDisable} onRequestHistory={onRequestHistory} />
             )}
           </div>
         </div>
+        {/* transition rules panel (segment 3, CE-designed minimal form) */}
+        {isTransitionsOpen && (
+          <div className="border-b border-subtle bg-layer-2/50 px-4 py-3 last:border-b-0">
+            <p className="mb-2 text-body-sm-medium text-secondary">{t("workflows.settings.transitions.title")}</p>
+            <WorkflowTransitionsPanel
+              workspaceSlug={workspaceSlug}
+              projectId={workflow.project}
+              workflowId={workflow.id}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

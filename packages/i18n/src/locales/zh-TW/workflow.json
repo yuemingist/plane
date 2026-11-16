@@ -44,7 +44,25 @@
         "action": {
           "enabled": "enabled the workflow",
           "disabled": "disabled the workflow",
-          "re_enabled": "re-enabled the workflow"
+          "re_enabled": "re-enabled the workflow",
+          "transition_rules_updated": "更新了流轉規則"
+        }
+      },
+      "transitions": {
+        "title": "流轉規則",
+        "toggle": "展開/收起流轉規則",
+        "description": "為每個狀態勾選允許移動到的目標狀態；未勾選任何目標的狀態不受限制（預設全部允許）。",
+        "move_to": "可移動到",
+        "unrestricted": "不受限",
+        "toasts": {
+          "success": {
+            "title": "成功",
+            "message": "流轉規則已更新。"
+          },
+          "error": {
+            "title": "錯誤",
+            "message": "流轉規則儲存失敗，請重試。"
+          }
         }
       }
     },
@@ -143,6 +161,10 @@
           "message": "無法修改狀態變更規則審核者。請再試一次。"
         }
       }
+    },
+    "transition_rejected_toast": {
+      "title": "無法移動工作項",
+      "message": "受工作流規則限制，不允許從「{from_state}」移動到「{to_state}」。"
     }
   }
 }

@@ -9,6 +9,8 @@ import { action, computed, makeObservable, observable, runInAction } from "mobx"
 import { computedFn } from "mobx-utils";
 // plane constants
 import { ALL_ISSUES, ISSUE_PRIORITIES } from "@plane/constants";
+import { setToast } from "@plane/blocks/toast";
+import { getI18n } from "@plane/i18n";
 // types
 import type {
   TIssue,
@@ -25,6 +27,7 @@ import type {
   TPaginationData,
   TBulkOperationsPayload,
   IBlockUpdateDependencyData,
+  IWorkflowTransitionError,
 } from "@plane/types";
 import { EIssueServiceType, EIssueLayoutTypes } from "@plane/types";
 // helpers
@@ -584,6 +587,23 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
       // If errored out update store again to revert the change
       this.rootIssueStore.issues.updateIssue(issueId, issueBeforeUpdate ?? {});
       this.updateIssueList(issueBeforeUpdate, { ...issueBeforeUpdate, ...data } as TIssue);
+      // 流转被工作流规则拒绝（段 3）：回滚已由上面完成，这里给出可读的专用提示
+      // （文案为 CE 自拟，标假设——段 3 产品方案 A7）；其余错误仍走调用方原有处理。
+      // store 非组件环境：直接取 react-i18next 实例。
+      const errorData = error as IWorkflowTransitionError;
+      if (errorData?.code === "workflow_transition_not_allowed") {
+        const i18n = getI18n();
+        setToast({
+          type: "error",
+          title: String(i18n.t("workflows.transition_rejected_toast.title")),
+          message: String(
+            i18n.t("workflows.transition_rejected_toast.message", {
+              from_state: errorData?.from_state_name ?? "",
+              to_state: errorData?.to_state_name ?? "",
+            })
+          ),
+        });
+      }
       throw error;
     }
   }

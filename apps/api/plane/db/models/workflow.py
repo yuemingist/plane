@@ -23,6 +23,7 @@ from django.db import models
 # Module imports
 from .base import BaseModel
 from .project import ProjectBaseModel
+from .state import State
 
 
 class Workflow(ProjectBaseModel):
@@ -53,6 +54,8 @@ class WorkflowChangeAction(models.TextChoices):
     ENABLED = "enabled", "enabled"
     DISABLED = "disabled", "disabled"
     RE_ENABLED = "re_enabled", "re-enabled"
+    # Step02 段 3：流转规则变更留痕（产品方案 A3）
+    TRANSITION_RULES_UPDATED = "transition_rules_updated", "transition rules updated"
 
 
 class WorkflowChangeLog(BaseModel):
@@ -83,3 +86,38 @@ class WorkflowChangeLog(BaseModel):
         verbose_name_plural = "Workflow Change Logs"
         db_table = "workflow_change_logs"
         ordering = ("-created_at",)
+
+
+class WorkflowTransition(ProjectBaseModel):
+    """流转规则行（Step02 段 3 追赶 BE）。
+
+    语义（段 3 产品方案 A1/A2）：规则是按源状态的白名单——
+    「从 from_state 只能移动到 to_state 集合」；某源状态没有规则行 = 该源状态
+    不受限（默认无规则 = 全部允许，58 号 §3.6 Business 实测依据）。
+
+    不变量：
+    - 规则只引用既有项目状态池（不复制状态，章程 §5）；
+    - 状态删除级联删除相关规则行（DB 层保证引用有效性，技术方案 §1.1 选型 A）；
+    - (workflow, from_state, to_state) 唯一（deleted_at is null 条件约束，同段 1 风格）。
+    """
+
+    workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE, related_name="transitions")
+    from_state = models.ForeignKey(State, on_delete=models.CASCADE, related_name="workflow_transitions_from")
+    to_state = models.ForeignKey(State, on_delete=models.CASCADE, related_name="workflow_transitions_to")
+
+    def __str__(self):
+        """Return the transition rule endpoints."""
+        return f"{self.from_state_id} -> {self.to_state_id} <{self.workflow.name}>"
+
+    class Meta:
+        verbose_name = "Workflow Transition"
+        verbose_name_plural = "Workflow Transitions"
+        db_table = "workflow_transitions"
+        ordering = ("from_state_id", "to_state_id")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["workflow", "from_state", "to_state"],
+                condition=models.Q(deleted_at__isnull=True),
+                name="workflow_transition_unique_when_deleted_at_null",
+            )
+        ]

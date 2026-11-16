@@ -146,4 +146,4 @@ from .issue_property import (
     IssueTypeIssuePropertySerializer,
     validate_property_value,
 )
-from .workflow import WorkflowChangeLogSerializer, WorkflowSerializer
+from .workflow import WorkflowChangeLogSerializer, WorkflowSerializer, WorkflowTransitionSerializer

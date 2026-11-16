@@ -55,6 +55,8 @@ export const WorkflowChangeHistoryPanel = observer(function WorkflowChangeHistor
         return t("workflows.settings.history.action.disabled");
       case "re_enabled":
         return t("workflows.settings.history.action.re_enabled");
+      case "transition_rules_updated":
+        return t("workflows.settings.history.action.transition_rules_updated");
       default:
         return action;
     }

@@ -18,6 +18,8 @@ export type { TNamespace } from "./constants/namespaces";
 
 // Utilities
 export { setLanguage } from "./core/set-language";
+// Non-component translation access (stores/services outside React): raw i18next instance handle
+export { getI18n } from "react-i18next";
 export { initPromise } from "./core";
 
 // Constants

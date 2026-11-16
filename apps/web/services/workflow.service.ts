@@ -6,7 +6,7 @@
 
 // plane imports
 import { API_BASE_URL } from "@plane/constants";
-import type { IWorkflow, IWorkflowChangeLog } from "@plane/types";
+import type { IWorkflow, IWorkflowChangeLog, IWorkflowTransition, IWorkflowTransitionGroup } from "@plane/types";
 // services
 import { APIService } from "@/services/api.service";
 
@@ -72,6 +72,35 @@ export class WorkflowService extends APIService {
     }`;
     return this.get(url)
       .then((response) => response?.data?.results ?? response?.data)
+      .catch((error) => {
+        throw error?.response?.data;
+      });
+  }
+
+  /**
+   * Transition rules (Step02 segment 3): read rows / full-replace via grouped
+   * payload. Empty array clears all rules (= all transitions allowed).
+   */
+  async getWorkflowTransitions(
+    workspaceSlug: string,
+    projectId: string,
+    workflowId: string
+  ): Promise<IWorkflowTransition[]> {
+    return this.get(`${this.resourceUrl(workspaceSlug, projectId)}${workflowId}/transitions/`)
+      .then((response) => response?.data)
+      .catch((error) => {
+        throw error?.response?.data;
+      });
+  }
+
+  async updateWorkflowTransitions(
+    workspaceSlug: string,
+    projectId: string,
+    workflowId: string,
+    transitions: IWorkflowTransitionGroup[]
+  ): Promise<IWorkflowTransition[]> {
+    return this.put(`${this.resourceUrl(workspaceSlug, projectId)}${workflowId}/transitions/`, { transitions })
+      .then((response) => response?.data)
       .catch((error) => {
         throw error?.response?.data;
       });

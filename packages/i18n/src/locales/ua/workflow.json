@@ -44,7 +44,25 @@
         "action": {
           "enabled": "enabled the workflow",
           "disabled": "disabled the workflow",
-          "re_enabled": "re-enabled the workflow"
+          "re_enabled": "re-enabled the workflow",
+          "transition_rules_updated": "Updated transition rules"
+        }
+      },
+      "transitions": {
+        "title": "Transition rules",
+        "toggle": "Toggle transition rules",
+        "description": "For each state, pick the states it is allowed to move to. A state with no selection is unrestricted.",
+        "move_to": "can move to",
+        "unrestricted": "Unrestricted",
+        "toasts": {
+          "success": {
+            "title": "Success",
+            "message": "Transition rules updated."
+          },
+          "error": {
+            "title": "Error",
+            "message": "Transition rules could not be updated. Please try again."
+          }
         }
       }
     },
@@ -143,6 +161,10 @@
           "message": "Не вдалося змінити рев'юерів правила зміни стану. Будь ласка, спробуйте ще раз."
         }
       }
+    },
+    "transition_rejected_toast": {
+      "title": "Cannot move work item",
+      "message": "Moving from \"{{from_state}}\" to \"{{to_state}}\" is not allowed by the workflow rules."
     }
   }
 }

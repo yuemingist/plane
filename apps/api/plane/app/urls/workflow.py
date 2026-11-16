@@ -37,4 +37,10 @@ urlpatterns = [
         WorkflowViewSet.as_view({"get": "change_history"}),
         name="project-workflow-change-history",
     ),
+    # 流转规则（段 3）：读 ADMIN/MEMBER/GUEST，全量替换写 ADMIN/MEMBER
+    path(
+        "workspaces/<str:slug>/projects/<uuid:project_id>/workflows/<uuid:pk>/transitions/",
+        WorkflowViewSet.as_view({"get": "transitions", "put": "replace_transitions"}),
+        name="project-workflow-transitions",
+    ),
 ]
