@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 # Module imports
 from .base import BaseSerializer
-from plane.db.models import Workflow, WorkflowChangeLog
+from plane.db.models import Workflow, WorkflowChangeLog, WorkflowTransition
 
 
 class WorkflowSerializer(BaseSerializer):
@@ -66,3 +66,12 @@ class WorkflowChangeLogSerializer(BaseSerializer):
             "display_name": actor.display_name,
             "avatar": actor.avatar or "",
         }
+
+
+class WorkflowTransitionSerializer(BaseSerializer):
+    """流转规则行序列化器（段 3，只读透出；写入走视图层全量替换 PUT）。"""
+
+    class Meta:
+        model = WorkflowTransition
+        fields = ["id", "workflow", "from_state", "to_state", "created_at", "updated_at"]
+        read_only_fields = ["id", "workflow", "from_state", "to_state", "created_at", "updated_at"]

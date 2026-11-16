@@ -22,11 +22,57 @@ from django.db import transaction
 from rest_framework import status
 from rest_framework.response import Response
 
+# Python imports
+from uuid import UUID
+
 # Module imports
 from .base import BaseViewSet
 from plane.app.permissions import ROLE, allow_permission
-from plane.app.serializers import WorkflowChangeLogSerializer, WorkflowSerializer
-from plane.db.models import Project, Workflow, WorkflowChangeAction, WorkflowChangeLog
+from plane.app.serializers import (
+    WorkflowChangeLogSerializer,
+    WorkflowSerializer,
+    WorkflowTransitionSerializer,
+)
+from plane.db.models import Project, State, Workflow, WorkflowChangeAction, WorkflowChangeLog, WorkflowTransition
+
+
+def validate_state_transition(project_id, from_state_id, to_state_id) -> dict | None:
+    """流转校验挂载点（Step02 段 3，技术方案 §2.1）。
+
+    语义（段 3 产品方案 A2）：工作流启用且配置了 from_state 的规则行时，
+    to_state 必须在允许集合内；无工作流 / 工作流停用 / 该源状态无规则行 → 放行。
+
+    返回 None=放行；返回 dict=拒绝（错误体含 code 与源/目标状态名，供前端
+    i18n toast 使用）。只读查询，不写任何留痕（留痕仍由既有 issue_activity 负责）。
+    """
+    if not from_state_id or not to_state_id or from_state_id == to_state_id:
+        return None
+
+    workflow = Workflow.objects.filter(
+        project_id=project_id, is_active=True, deleted_at__isnull=True
+    ).first()
+    if workflow is None:
+        return None
+
+    # 该源状态没有规则行 = 不受限（白名单按源状态生效）
+    if not WorkflowTransition.objects.filter(
+        workflow=workflow, from_state_id=from_state_id, deleted_at__isnull=True
+    ).exists():
+        return None
+
+    if WorkflowTransition.objects.filter(
+        workflow=workflow, from_state_id=from_state_id, to_state_id=to_state_id, deleted_at__isnull=True
+    ).exists():
+        return None
+
+    from_state_name = State.objects.filter(pk=from_state_id).values_list("name", flat=True).first()
+    to_state_name = State.objects.filter(pk=to_state_id).values_list("name", flat=True).first()
+    return {
+        "error": "This state transition is not allowed by the project workflow.",
+        "code": "workflow_transition_not_allowed",
+        "from_state_name": from_state_name,
+        "to_state_name": to_state_name,
+    }
 
 
 class WorkflowViewSet(BaseViewSet):
@@ -143,3 +189,119 @@ class WorkflowViewSet(BaseViewSet):
             queryset=change_logs,
             on_results=lambda rows: WorkflowChangeLogSerializer(rows, many=True).data,
         )
+
+    @allow_permission([ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST])
+    def transitions(self, request, slug, project_id, pk):
+        """流转规则行列表（段 3）：ADMIN/MEMBER/GUEST 可读（产品方案 §5）。"""
+        workflow = self._get_scoped_instance(slug, project_id, pk)
+        if workflow is None:
+            return Response({"error": "Workflow not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        transitions = WorkflowTransition.objects.filter(
+            workflow=workflow, deleted_at__isnull=True
+        ).order_by("from_state_id", "to_state_id")
+        serializer = WorkflowTransitionSerializer(transitions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @allow_permission([ROLE.ADMIN, ROLE.MEMBER])
+    def replace_transitions(self, request, slug, project_id, pk):
+        """全量替换流转规则（段 3，技术方案 §2）。
+
+        body: {"transitions": [{"from_state": id, "to_states": [ids...]}]}
+        - from/to state 必须属于本项目、from != to，否则 400；
+        - 事务内全删全插；仅当规则集合实际变化时写一条
+          WorkflowChangeLog(action="transition_rules_updated")（不变更不写历史）；
+        - 空数组 = 清空规则（默认无规则 = 全部允许，产品方案 A2）。
+        """
+        workflow = self._get_scoped_instance(slug, project_id, pk)
+        if workflow is None:
+            return Response({"error": "Workflow not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        payload = request.data.get("transitions") if isinstance(request.data, dict) else None
+        if not isinstance(payload, list):
+            return Response(
+                {"error": "transitions must be a list of {from_state, to_states} groups"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        project_state_ids = set(
+            # 软删除状态不可作为规则端点（产品方案 A6：陈旧引用靠全量替换丢弃）
+            State.all_state_objects.filter(project_id=project_id, deleted_at__isnull=True).values_list(
+                "id", flat=True
+            )
+        )
+
+        desired_rows: set[tuple[UUID, UUID]] = set()
+        for group in payload:
+            if not isinstance(group, dict):
+                return Response({"error": "Each transition group must be an object"}, status=status.HTTP_400_BAD_REQUEST)
+            from_state_id = group.get("from_state")
+            to_state_ids = group.get("to_states")
+            if not isinstance(from_state_id, str) or not isinstance(to_state_ids, list):
+                return Response(
+                    {"error": "from_state must be a state id and to_states a list of state ids"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            try:
+                from_uuid = UUID(from_state_id)
+            except ValueError:
+                return Response({"error": "Invalid from_state id"}, status=status.HTTP_400_BAD_REQUEST)
+            if from_uuid not in project_state_ids:
+                return Response(
+                    {"error": "from_state is not a state of this project"}, status=status.HTTP_400_BAD_REQUEST
+                )
+            for to_state_id in to_state_ids:
+                if not isinstance(to_state_id, str):
+                    return Response({"error": "to_states must contain state ids"}, status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    to_uuid = UUID(to_state_id)
+                except ValueError:
+                    return Response({"error": "Invalid to_state id"}, status=status.HTTP_400_BAD_REQUEST)
+                if to_uuid not in project_state_ids:
+                    return Response(
+                        {"error": "to_state is not a state of this project"}, status=status.HTTP_400_BAD_REQUEST
+                    )
+                if to_uuid == from_uuid:
+                    return Response(
+                        {"error": "from_state and to_state cannot be the same state"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                desired_rows.add((from_uuid, to_uuid))
+
+        with transaction.atomic():
+            # 锁既有规则行串行化并发 PUT（list() 触发求值以真正加锁）
+            list(
+                WorkflowTransition.objects.select_for_update().filter(
+                    workflow=workflow, deleted_at__isnull=True
+                )
+            )
+            current_rows = set(
+                WorkflowTransition.objects.filter(workflow=workflow, deleted_at__isnull=True).values_list(
+                    "from_state_id", "to_state_id"
+                )
+            )
+            if current_rows != desired_rows:
+                WorkflowTransition.objects.filter(workflow=workflow, deleted_at__isnull=True).delete()
+                WorkflowTransition.objects.bulk_create(
+                    [
+                        WorkflowTransition(
+                            workflow=workflow,
+                            project_id=project_id,
+                            workspace_id=workflow.workspace_id,
+                            from_state_id=from_state_id,
+                            to_state_id=to_state_id,
+                        )
+                        for from_state_id, to_state_id in sorted(desired_rows)
+                    ]
+                )
+                WorkflowChangeLog.objects.create(
+                    workflow=workflow,
+                    actor=request.user,
+                    action=WorkflowChangeAction.TRANSITION_RULES_UPDATED,
+                    note=f"{len(desired_rows)} transition rules",
+                )
+
+        transitions = WorkflowTransition.objects.filter(
+            workflow=workflow, deleted_at__isnull=True
+        ).order_by("from_state_id", "to_state_id")
+        return Response(WorkflowTransitionSerializer(transitions, many=True).data, status=status.HTTP_200_OK)

@@ -92,4 +92,4 @@ from .sticky import Sticky
 from .description import Description, DescriptionVersion
 
 from .issue_property import IssueProperty, IssuePropertyType, IssuePropertyValue, IssueTypeIssueProperty
-from .workflow import Workflow, WorkflowChangeAction, WorkflowChangeLog
+from .workflow import Workflow, WorkflowChangeAction, WorkflowChangeLog, WorkflowTransition

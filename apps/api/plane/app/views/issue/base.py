@@ -33,6 +33,7 @@ from rest_framework.response import Response
 
 # Module imports
 from plane.app.permissions import ROLE, allow_permission
+from plane.app.views.workflow import validate_state_transition
 from plane.app.serializers import (
     IssueCreateSerializer,
     IssueDetailSerializer,
@@ -676,6 +677,14 @@ class IssueViewSet(BaseViewSet):
 
         if not issue:
             return Response({"error": "Issue not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # 流转规则校验（Step02 段 3，技术方案 §2.1）：仅当请求试图变更 state 时介入；
+        # 被拒直接 400，不进 serializer.save、不触发 issue_activity（既有留痕行为不变）。
+        requested_state_id = request.data.get("state_id") or request.data.get("state")
+        if requested_state_id and str(requested_state_id) != str(issue.state_id):
+            transition_error = validate_state_transition(project_id, issue.state_id, requested_state_id)
+            if transition_error is not None:
+                return Response(transition_error, status=status.HTTP_400_BAD_REQUEST)
 
         current_instance = json.dumps(IssueDetailSerializer(issue).data, cls=DjangoJSONEncoder)
 
