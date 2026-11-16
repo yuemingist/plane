@@ -47,6 +47,12 @@
           },
           "formula": {
             "label": "数式"
+          },
+          "rich_text": {
+            "label": "Rich text"
+          },
+          "url": {
+            "label": "URL"
           }
         },
         "attributes": {
@@ -68,7 +74,20 @@
           },
           "number": {
             "default": {
-              "placeholder": "数値を追加"
+              "placeholder": "数値を追加",
+              "label": "Default value (optional)"
+            },
+            "format": {
+              "label": "Format",
+              "standard": "Standard",
+              "percent": "Percent",
+              "currency": "Currency"
+            },
+            "decimal_places": {
+              "label": "Decimal places"
+            },
+            "thousands_separator": {
+              "label": "Show 1,000 instead of 1000"
             }
           },
           "relation": {
@@ -164,6 +183,12 @@
             },
             "description": {
               "placeholder": "説明"
+            },
+            "active": {
+              "label": "Active"
+            },
+            "required": {
+              "label": "Required property"
             }
           },
           "errors": {
@@ -215,7 +240,8 @@
           "description": "プロパティの削除は既存のデータの損失につながる可能性があります。",
           "secondary_description": "代わりにプロパティを無効化しますか？",
           "primary_button": "{action}、削除します",
-          "secondary_button": "はい、無効化します"
+          "secondary_button": "はい、無効化します",
+          "bound_error": "TODO(cloud-en): This property is still linked to work item types. Remove those links before deleting it."
         },
         "mandate_confirmation": {
           "label": "必須プロパティ",
@@ -231,7 +257,28 @@
           "description": "この作業項目タイプに追加する新しいプロパティがここに表示されます。",
           "no_properties_description": "No custom properties added yet: define properties to track specific data for this work item type."
         },
-        "coming_soon_badge": "Coming soon"
+        "coming_soon_badge": "Coming soon",
+        "list": {
+          "name_column": "Name",
+          "status_column": "Status",
+          "type_column": "Type",
+          "linked_types_column": "Work item types in use"
+        },
+        "enable_confirmation": {
+          "title": "Enable this property?",
+          "content": "TODO(cloud-en): This property will be enabled for every linked work item type. Each type shows options according to its context, or default options when none are configured."
+        },
+        "value": {
+          "placeholder": {
+            "text": "Add text",
+            "number": "Add number",
+            "date": "Select date",
+            "member": "Select member",
+            "url": "Add URL",
+            "rich_text": "Add text",
+            "boolean": "Toggle"
+          }
+        }
       },
       "types": {
         "title": "タイプ",
@@ -267,7 +314,9 @@
           "empty": {
             "title": "利用可能なプロパティがありません",
             "description": "すべてのプロパティはすでにこのタイプにリンクされています。"
-          }
+          },
+          "search_placeholder": "Search properties",
+          "empty_search": "No properties match your search."
         },
         "unlink_confirmation": {
           "title": "プロパティのリンクを解除",
@@ -276,6 +325,10 @@
           "input_label_suffix": "して続行：",
           "confirm": "プロパティのリンクを解除",
           "loading": "リンク解除中"
+        },
+        "remove": {
+          "title": "Remove property",
+          "description": "TODO(cloud-en): The property stays in the project property pool and its stored values are kept. It will stop showing on this work item type."
         }
       },
       "item_delete_confirmation": {

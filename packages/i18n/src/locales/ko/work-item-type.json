@@ -47,6 +47,12 @@
           },
           "formula": {
             "label": "수식"
+          },
+          "rich_text": {
+            "label": "Rich text"
+          },
+          "url": {
+            "label": "URL"
           }
         },
         "attributes": {
@@ -68,7 +74,20 @@
           },
           "number": {
             "default": {
-              "placeholder": "넘버 추가"
+              "placeholder": "넘버 추가",
+              "label": "Default value (optional)"
+            },
+            "format": {
+              "label": "Format",
+              "standard": "Standard",
+              "percent": "Percent",
+              "currency": "Currency"
+            },
+            "decimal_places": {
+              "label": "Decimal places"
+            },
+            "thousands_separator": {
+              "label": "Show 1,000 instead of 1000"
             }
           },
           "relation": {
@@ -164,6 +183,12 @@
             },
             "description": {
               "placeholder": "디스크립션"
+            },
+            "active": {
+              "label": "Active"
+            },
+            "required": {
+              "label": "Required property"
             }
           },
           "errors": {
@@ -215,7 +240,8 @@
           "description": "프로퍼티 삭제는 기존 데이터 손실로 이어질 수 있습니다.",
           "secondary_description": "대신 프로퍼티를 비활성화하시겠습니까?",
           "primary_button": "{action}, 삭제하기",
-          "secondary_button": "네, 비활성화하기"
+          "secondary_button": "네, 비활성화하기",
+          "bound_error": "TODO(cloud-en): This property is still linked to work item types. Remove those links before deleting it."
         },
         "mandate_confirmation": {
           "label": "필수 프로퍼티",
@@ -231,7 +257,28 @@
           "description": "이 워크 아이템 타입에 대해 추가하는 새 프로퍼티가 여기에 표시됩니다.",
           "no_properties_description": "No custom properties added yet: define properties to track specific data for this work item type."
         },
-        "coming_soon_badge": "Coming soon"
+        "coming_soon_badge": "Coming soon",
+        "list": {
+          "name_column": "Name",
+          "status_column": "Status",
+          "type_column": "Type",
+          "linked_types_column": "Work item types in use"
+        },
+        "enable_confirmation": {
+          "title": "Enable this property?",
+          "content": "TODO(cloud-en): This property will be enabled for every linked work item type. Each type shows options according to its context, or default options when none are configured."
+        },
+        "value": {
+          "placeholder": {
+            "text": "Add text",
+            "number": "Add number",
+            "date": "Select date",
+            "member": "Select member",
+            "url": "Add URL",
+            "rich_text": "Add text",
+            "boolean": "Toggle"
+          }
+        }
       },
       "types": {
         "title": "타입",
@@ -267,7 +314,9 @@
           "empty": {
             "title": "사용 가능한 프로퍼티 없음",
             "description": "모든 프로퍼티가 이미 이 타입에 연결되어 있습니다."
-          }
+          },
+          "search_placeholder": "Search properties",
+          "empty_search": "No properties match your search."
         },
         "unlink_confirmation": {
           "title": "프로퍼티 연결 해제",
@@ -276,6 +325,10 @@
           "input_label_suffix": "계속하려면:",
           "confirm": "프로퍼티 연결 해제",
           "loading": "연결 해제 중"
+        },
+        "remove": {
+          "title": "Remove property",
+          "description": "TODO(cloud-en): The property stays in the project property pool and its stored values are kept. It will stop showing on this work item type."
         }
       },
       "item_delete_confirmation": {

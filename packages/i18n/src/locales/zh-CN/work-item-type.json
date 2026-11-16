@@ -47,6 +47,12 @@
           },
           "formula": {
             "label": "公式"
+          },
+          "rich_text": {
+            "label": "富文本"
+          },
+          "url": {
+            "label": "URL"
           }
         },
         "attributes": {
@@ -68,7 +74,20 @@
           },
           "number": {
             "default": {
-              "placeholder": "添加数字"
+              "placeholder": "添加数字",
+              "label": "默认值（可选）"
+            },
+            "format": {
+              "label": "格式",
+              "standard": "标准",
+              "percent": "百分比",
+              "currency": "货币"
+            },
+            "decimal_places": {
+              "label": "小数位数"
+            },
+            "thousands_separator": {
+              "label": "显示 1,000 而不是 1000"
             }
           },
           "relation": {
@@ -164,6 +183,12 @@
             },
             "description": {
               "placeholder": "描述"
+            },
+            "active": {
+              "label": "活动"
+            },
+            "required": {
+              "label": "必填属性"
             }
           },
           "errors": {
@@ -215,7 +240,8 @@
           "description": "删除属性可能导致现有数据丢失。",
           "secondary_description": "您是否想要禁用该属性？",
           "primary_button": "{action}，删除它",
-          "secondary_button": "是的，禁用它"
+          "secondary_button": "是的，禁用它",
+          "bound_error": "该属性已绑定到工作项类型，请先在类型详情中移除绑定后再删除。"
         },
         "mandate_confirmation": {
           "label": "必填属性",
@@ -231,7 +257,28 @@
           "description": "您为此工作项类型添加的新属性将显示在此处。",
           "no_properties_description": "未添加自定义属性：定义属性以跟踪工作项类型的特定数据。"
         },
-        "coming_soon_badge": "即将支持"
+        "coming_soon_badge": "即将支持",
+        "list": {
+          "name_column": "名称",
+          "status_column": "状态",
+          "type_column": "类型",
+          "linked_types_column": "使用中的工作项类型"
+        },
+        "enable_confirmation": {
+          "title": "启用此属性？",
+          "content": "此属性将在所有已关联的工作项类型中启用。每种类型将根据其上下文显示选项，如果未配置任何选项，则显示默认选项。"
+        },
+        "value": {
+          "placeholder": {
+            "text": "添加文本",
+            "number": "添加数字",
+            "date": "选择日期",
+            "member": "选择成员",
+            "url": "添加 URL",
+            "rich_text": "添加文本",
+            "boolean": "开关"
+          }
+        }
       },
       "types": {
         "title": "类型",
@@ -267,7 +314,9 @@
           "empty": {
             "title": "没有可用属性",
             "description": "所有属性均已关联到此类型。"
-          }
+          },
+          "search_placeholder": "搜索属性",
+          "empty_search": "没有符合搜索条件的属性。"
         },
         "unlink_confirmation": {
           "title": "取消关联属性",
@@ -276,6 +325,10 @@
           "input_label_suffix": "以继续：",
           "confirm": "取消关联属性",
           "loading": "正在取消关联"
+        },
+        "remove": {
+          "title": "移除属性",
+          "description": "该属性将保留在项目属性池中，已存的属性值不会被删除，只是不再显示在此工作项类型上。"
         }
       },
       "item_delete_confirmation": {

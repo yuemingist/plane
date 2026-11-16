@@ -47,6 +47,12 @@
           },
           "formula": {
             "label": "公式"
+          },
+          "rich_text": {
+            "label": "Rich text"
+          },
+          "url": {
+            "label": "URL"
           }
         },
         "attributes": {
@@ -68,7 +74,20 @@
           },
           "number": {
             "default": {
-              "placeholder": "添加數字"
+              "placeholder": "添加數字",
+              "label": "Default value (optional)"
+            },
+            "format": {
+              "label": "Format",
+              "standard": "Standard",
+              "percent": "Percent",
+              "currency": "Currency"
+            },
+            "decimal_places": {
+              "label": "Decimal places"
+            },
+            "thousands_separator": {
+              "label": "Show 1,000 instead of 1000"
             }
           },
           "relation": {
@@ -164,6 +183,12 @@
             },
             "description": {
               "placeholder": "描述"
+            },
+            "active": {
+              "label": "Active"
+            },
+            "required": {
+              "label": "Required property"
             }
           },
           "errors": {
@@ -215,7 +240,8 @@
           "description": "刪除屬性可能導致現有數據丟失。",
           "secondary_description": "您是否想要禁用屬性代替刪除？",
           "primary_button": "{action}，刪除它",
-          "secondary_button": "是的，禁用它"
+          "secondary_button": "是的，禁用它",
+          "bound_error": "TODO(cloud-en): This property is still linked to work item types. Remove those links before deleting it."
         },
         "mandate_confirmation": {
           "label": "必填屬性",
@@ -231,7 +257,28 @@
           "description": "您為此工作項目類型添加的新屬性將顯示在此處。",
           "no_properties_description": "No custom properties added yet: define properties to track specific data for this work item type."
         },
-        "coming_soon_badge": "Coming soon"
+        "coming_soon_badge": "Coming soon",
+        "list": {
+          "name_column": "Name",
+          "status_column": "Status",
+          "type_column": "Type",
+          "linked_types_column": "Work item types in use"
+        },
+        "enable_confirmation": {
+          "title": "Enable this property?",
+          "content": "TODO(cloud-en): This property will be enabled for every linked work item type. Each type shows options according to its context, or default options when none are configured."
+        },
+        "value": {
+          "placeholder": {
+            "text": "Add text",
+            "number": "Add number",
+            "date": "Select date",
+            "member": "Select member",
+            "url": "Add URL",
+            "rich_text": "Add text",
+            "boolean": "Toggle"
+          }
+        }
       },
       "types": {
         "title": "類型",
@@ -267,7 +314,9 @@
           "empty": {
             "title": "沒有可用的屬性",
             "description": "所有屬性都已連結到此類型。"
-          }
+          },
+          "search_placeholder": "Search properties",
+          "empty_search": "No properties match your search."
         },
         "unlink_confirmation": {
           "title": "取消連結屬性",
@@ -276,6 +325,10 @@
           "input_label_suffix": "以繼續：",
           "confirm": "取消連結屬性",
           "loading": "取消連結中"
+        },
+        "remove": {
+          "title": "Remove property",
+          "description": "TODO(cloud-en): The property stays in the project property pool and its stored values are kept. It will stop showing on this work item type."
         }
       },
       "item_delete_confirmation": {
