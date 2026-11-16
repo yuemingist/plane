@@ -112,13 +112,20 @@ export const WORK_ITEM_FILTER_PROPERTY_KEYS = [
   "type_id",
   "parent__type_id",
 ] as const;
-export type TWorkItemFilterProperty = (typeof WORK_ITEM_FILTER_PROPERTY_KEYS)[number];
+/**
+ * 自定义属性筛选键（段 4 属性贯穿）：`customproperty_<属性id>`。
+ * 动态键不在常量清单里，用 `(string & {})` 放行并保留既有键的字面量补全。
+ */
+export type TWorkItemFilterProperty = (typeof WORK_ITEM_FILTER_PROPERTY_KEYS)[number] | (string & {});
 
 export type TWorkItemFilterConditionKey = `${TWorkItemFilterProperty}__${TSupportedOperators}`;
 
 export type TWorkItemFilterConditionData = Partial<{
   [K in TWorkItemFilterConditionKey]: string | boolean | number;
-}>;
+}> & {
+  /** 自定义属性动态条件（`customproperty_<id>__<op>`），与后端 IssueComplexFilterBackend 对齐 */
+  [key: `customproperty_${string}__${TSupportedOperators}`]: string | boolean | number;
+};
 
 export type TWorkItemFilterAndGroup = {
   [LOGICAL_OPERATOR.AND]: TWorkItemFilterConditionData[];
@@ -177,6 +184,8 @@ export interface IIssueDisplayProperties {
   modules?: boolean;
   cycle?: boolean;
   issue_type?: boolean;
+  /** 自定义属性列动态键（段 4 属性贯穿）：`issue_property_<属性id>`，默认关闭 */
+  [key: `issue_property_${string}`]: boolean | undefined;
 }
 
 export type TIssueKanbanFilters = {
