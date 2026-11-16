@@ -299,19 +299,8 @@ class WorkItemTypeViewSet(WorkItemTypeFeatureGateMixin, BaseViewSet):
         serializer = IssueTypeSerializer(self._annotated_queryset(project_id), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @allow_permission([ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST])
-    def properties(self, request, slug, project_id, pk):
-        """类型属性列表占位：本步恒返回空数组（属性体系属 P2-13），
-        路由先占位避免前端另造路径。"""
-        exists = IssueType.objects.filter(
-            pk=pk,
-            workspace__slug=slug,
-            project_issue_types__project_id=project_id,
-            project_issue_types__deleted_at__isnull=True,
-        ).exists()
-        if not exists:
-            return Response({"error": "Work item type not found"}, status=status.HTTP_404_NOT_FOUND)
-        return Response([], status=status.HTTP_200_OK)
+    # 类型属性列表占位（Step01 恒空数组）已由段 2 IssueTypePropertyViewSet
+    # 接管（app/views/issue_property.py），占位实现移除（技术方案 R2）。
 
 
 class ProjectIssueTypeViewSet(WorkItemTypeFeatureGateMixin, BaseViewSet):

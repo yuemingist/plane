@@ -31,12 +31,8 @@ urlpatterns = [
         WorkItemTypeViewSet.as_view({"post": "mark_default"}),
         name="project-work-item-type-mark-default",
     ),
-    # 属性列表占位：本步恒返回空数组（属性体系属 P2-13）
-    path(
-        "workspaces/<str:slug>/projects/<uuid:project_id>/work-item-types/<uuid:pk>/properties/",
-        WorkItemTypeViewSet.as_view({"get": "properties"}),
-        name="project-work-item-type-properties",
-    ),
+    # 属性列表占位已由段 2 issue_property.py 的绑定路由接管
+    # （同名路由 project-work-item-type-properties 移到新文件，避免双路由冲突）
     # 项目 <-> 类型桥最小绑定面
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/project-issue-types/",

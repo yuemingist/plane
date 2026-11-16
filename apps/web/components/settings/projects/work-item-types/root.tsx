@@ -71,7 +71,7 @@ export const ProjectWorkItemTypesRoot = observer(function ProjectWorkItemTypesRo
       </TabsPanel>
       <TabsPanel value="properties">
         <div className="mt-6">
-          <PropertiesTab variant="tab" />
+          <PropertiesTab workspaceSlug={workspaceSlug} projectId={projectId} />
         </div>
       </TabsPanel>
       <TabsPanel value="hierarchy">

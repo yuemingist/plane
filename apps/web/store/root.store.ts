@@ -40,6 +40,8 @@ import type { IProjectInboxStore } from "./inbox/project-inbox.store";
 import { ProjectInboxStore } from "./inbox/project-inbox.store";
 import type { IInstanceStore } from "./instance.store";
 import { InstanceStore } from "./instance.store";
+import type { IIssuePropertyStore } from "./issue-property.store";
+import { IssuePropertyStore } from "./issue-property.store";
 import type { IIssueTypeStore } from "./issue-type.store";
 import { IssueTypeStore } from "./issue-type.store";
 import type { IIssueRootStore } from "./issue/root.store";
@@ -87,6 +89,7 @@ export class CoreRootStore {
   issue: IIssueRootStore;
   state: IStateStore;
   label: ILabelStore;
+  issueProperty: IIssuePropertyStore;
   issueType: IIssueTypeStore;
   dashboard: IDashboardStore;
   analytics: IAnalyticsStore;
@@ -125,6 +128,7 @@ export class CoreRootStore {
     this.issue = new IssueRootStore(this);
     this.state = new StateStore(this);
     this.label = new LabelStore(this);
+    this.issueProperty = new IssuePropertyStore(this);
     this.issueType = new IssueTypeStore(this);
     this.dashboard = new DashboardStore(this);
     this.multipleSelect = new MultipleSelectStore();
@@ -161,6 +165,7 @@ export class CoreRootStore {
     this.issue = new IssueRootStore(this);
     this.state = new StateStore(this);
     this.label = new LabelStore(this);
+    this.issueProperty = new IssuePropertyStore(this);
     this.issueType = new IssueTypeStore(this);
     this.dashboard = new DashboardStore(this);
     this.projectInbox = new ProjectInboxStore(this);

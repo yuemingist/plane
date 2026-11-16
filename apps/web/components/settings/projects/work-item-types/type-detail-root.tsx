@@ -18,7 +18,7 @@ import { cn } from "@plane/utils";
 import { useIssueType } from "@/hooks/store/use-issue-type";
 // local imports
 import { CreateTypeModal } from "./create-type-modal";
-import { PropertiesTab } from "./properties-tab";
+import { TypePropertiesSection } from "./type-properties-section";
 import { TypeIcon } from "./type-icon";
 
 type TTypeDetailRootProps = {
@@ -160,8 +160,8 @@ export const TypeDetailRoot = observer(function TypeDetailRoot(props: TTypeDetai
         </div>
       </div>
 
-      {/* properties empty state (detail variant, no tab title) */}
-      <PropertiesTab variant="detail" />
+      {/* properties section (Step02 段 2: bound property management, 57 号 §3.4) */}
+      <TypePropertiesSection workspaceSlug={workspaceSlug} projectId={projectId} typeId={issueTypeId} />
 
       {isEditModalOpen && (
         <CreateTypeModal

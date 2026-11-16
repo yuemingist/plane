@@ -245,4 +245,5 @@ from .issue_type import ProjectIssueTypeViewSet, WorkItemTypeViewSet
 from .epic.base import EpicSubIssuesEndpoint, EpicViewSet
 
 # 工作流域（Step02 段 1 追赶 BE）
+from .issue_property import IssuePropertyViewSet, IssuePropertyValueViewSet, IssueTypePropertyViewSet
 from .workflow import WorkflowViewSet

@@ -24,6 +24,7 @@ from .timezone import urlpatterns as timezone_urls
 from .exporter import urlpatterns as exporter_urls
 from .issue_type import urlpatterns as issue_type_urls
 from .epic import urlpatterns as epic_urls
+from .issue_property import urlpatterns as issue_property_urls
 from .workflow import urlpatterns as workflow_urls
 
 urlpatterns = [
@@ -49,5 +50,6 @@ urlpatterns = [
     *exporter_urls,
     *issue_type_urls,
     *epic_urls,
+    *issue_property_urls,
     *workflow_urls,
 ]
