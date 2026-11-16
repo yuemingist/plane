@@ -367,9 +367,9 @@ class IssueFilterSet(BaseFilterSet):
         value_q = Q()
         if is_multi_container:
             for coerced in coerced_values:
-                value_q |= Q(value__contains=[coerced])
+                value_q |= Q(issue_property_values__value__contains=[coerced])
         else:
-            value_q = Q(value__in=coerced_values)
+            value_q = Q(issue_property_values__value__in=coerced_values)
 
         return (
             Q(
