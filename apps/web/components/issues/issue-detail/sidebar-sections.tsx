@@ -30,6 +30,7 @@ import { useMember } from "@/hooks/store/use-member";
 import { useProject } from "@/hooks/store/use-project";
 // local imports
 import { IssueCycleSelect } from "./cycle-select";
+import { CustomPropertiesSection } from "./sidebar/custom-properties-section";
 import { IssueLabel } from "./label";
 import { IssueModuleSelect } from "./module-select";
 import type { TIssueOperations } from "./root";
@@ -178,6 +179,14 @@ export const IssueDetailSidebarSections = observer(function IssueDetailSidebarSe
           </>
         )}
       </div>
+
+      {/* 自定义属性分区（Step02 段 2）：按类型显示绑定且已启用的属性 */}
+      <CustomPropertiesSection
+        workspaceSlug={workspaceSlug}
+        projectId={projectId}
+        issueId={issueId}
+        disabled={disabled}
+      />
 
       {auditRows.length > 0 && (
         <div className={cn("flex flex-col gap-1 py-6", { "opacity-60": disabled })}>

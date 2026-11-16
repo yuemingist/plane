@@ -37,6 +37,7 @@ import {
 } from "@plane/utils";
 // components
 import {
+  CustomPropertyFields,
   IssueDefaultProperties,
   IssueDescriptionEditor,
   IssueParentTag,
@@ -431,6 +432,12 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
                 isDraft={isDraft}
                 handleFormChange={handleFormChange}
                 setSelectedParentIssue={setSelectedParentIssue}
+              />
+              {/* 自定义属性字段（Step02 段 2）：按所选类型渲染绑定且已启用的属性 */}
+              <CustomPropertyFields
+                workspaceSlug={workspaceSlug?.toString() ?? ""}
+                projectId={projectId}
+                typeId={watch("type_id")}
               />
             </div>
           </DialogMain>

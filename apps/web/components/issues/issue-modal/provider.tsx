@@ -11,6 +11,7 @@ import type { ISearchIssueResponse, TIssue } from "@plane/types";
 // components
 import { IssueModalContext } from "@/components/issues/issue-modal/context";
 // hooks
+import { useIssueProperty } from "@/hooks/store/use-issue-property";
 import { useIssueType } from "@/hooks/store/use-issue-type";
 import { useUser } from "@/hooks/store/user/user-user";
 
@@ -28,6 +29,7 @@ export const IssueModalProvider = observer(function IssueModalProvider(props: TI
   // store hooks
   const { projectsWithCreatePermissions } = useUser();
   const { getDefaultType } = useIssueType();
+  const issuePropertyStore = useIssueProperty();
   // derived values
   const projectIdsWithCreatePermissions = Object.keys(projectsWithCreatePermissions ?? {});
 
@@ -50,7 +52,16 @@ export const IssueModalProvider = observer(function IssueModalProvider(props: TI
         getIssueTypeIdOnProjectChange: (projectId) => getDefaultType(projectId)?.id ?? null,
         getActiveAdditionalPropertiesLength: () => 0,
         handlePropertyValuesValidation: () => true,
-        handleCreateUpdatePropertyValues: () => Promise.resolve(),
+        // Step02 段 2：自定义属性值落库——create/update 成功后把弹窗暂存的
+        // draftValues 批量 upsert（空值清空），随后清空暂存区
+        handleCreateUpdatePropertyValues: async ({ issueId, projectId, workspaceSlug }) => {
+          const draftValues = issuePropertyStore.draftValues;
+          if (!draftValues || Object.keys(draftValues).length === 0 || !issueId || !projectId || !workspaceSlug) {
+            return;
+          }
+          await issuePropertyStore.saveIssuePropertyValues(workspaceSlug, projectId, issueId, draftValues);
+          issuePropertyStore.clearDraftValues();
+        },
         handleProjectEntitiesFetch: () => Promise.resolve(),
         handleTemplateChange: () => Promise.resolve(),
         handleConvert: () => Promise.resolve(),
