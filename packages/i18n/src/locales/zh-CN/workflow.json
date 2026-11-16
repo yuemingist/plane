@@ -1,5 +1,53 @@
 {
   "workflows": {
+    "settings": {
+      "label": "工作流",
+      "description": "工作流控制工作项如何在状态之间移动——谁可以移动，以及可以移到何处。",
+      "enable": {
+        "title": "启用工作流",
+        "description": "在此项目中强制执行工作流规则。",
+        "success_toast": {
+          "title": "成功！",
+          "message": "工作流已成功启用。"
+        }
+      },
+      "table": {
+        "title": "工作流",
+        "columns": {
+          "workflow": "工作流",
+          "status": "状态",
+          "states": "状态",
+          "work_item_types": "工作项类型"
+        },
+        "states": {
+          "all": "所有状态"
+        },
+        "work_item_types": {
+          "all": "所有工作项类型"
+        }
+      },
+      "row_menu": {
+        "disable": "禁用"
+      },
+      "disable": {
+        "confirmation": {
+          "title": "您确定要停用这个工作流吗？",
+          "description": "如果您停用这个工作流，此项目将不再执行工作流规则。"
+        },
+        "success_toast": {
+          "title": "成功！",
+          "message": "工作流已成功停用。"
+        }
+      },
+      "history": {
+        "empty": "暂无变更记录。",
+        "action": {
+          "enabled": "启用了工作流",
+          "disabled": "停用了工作流",
+          "re_enabled": "重新启用了工作流"
+        }
+      }
+    },
     "workflow_states": {
       "work_item_creation": "允许新工作项",
       "work_item_creation_disable_tooltip": "工作项创建在此状态中被禁用",

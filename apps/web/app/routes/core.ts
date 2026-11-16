@@ -344,6 +344,11 @@ export const coreRoutes: RouteConfigEntry[] = [
               ":workspaceSlug/settings/projects/:projectId/work-item-types/types/:typeId",
               "./(all)/[workspaceSlug]/(settings)/settings/projects/[projectId]/work-item-types/types/[typeId]/page.tsx"
             ),
+            // Project Workflows (Step02 段 1: Business 壳)
+            route(
+              ":workspaceSlug/settings/projects/:projectId/workflows",
+              "./(all)/[workspaceSlug]/(settings)/settings/projects/[projectId]/workflows/page.tsx"
+            ),
             // Project Labels
             route(
               ":workspaceSlug/settings/projects/:projectId/labels",

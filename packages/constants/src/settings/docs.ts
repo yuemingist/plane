@@ -12,6 +12,7 @@ export const SETTINGS_DOCS_URLS = {
   // project
   states: "https://docs.plane.so/core-concepts/issues/states",
   work_item_types: "https://docs.plane.so/core-concepts/issues/issue-types",
+  workflows: "https://docs.plane.so/core-concepts/workflows",
   labels: "https://docs.plane.so/core-concepts/issues/labels",
   estimates: "https://docs.plane.so/core-concepts/issues/estimates",
   cycles: "https://docs.plane.so/core-concepts/cycles",
