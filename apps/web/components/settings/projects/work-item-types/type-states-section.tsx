@@ -87,14 +87,14 @@ export const TypeStatesSection = observer(function TypeStatesSection(props: TTyp
       setIsDirty(false);
       setToast({
         type: "success",
-        title: t("work_item_types.settings.states.toasts.success.title"),
-        message: t("work_item_types.settings.states.toasts.success.message"),
+        title: t("work_item_types.states.toasts.success.title"),
+        message: t("work_item_types.states.toasts.success.message"),
       });
     } catch {
       setToast({
         type: "error",
-        title: t("work_item_types.settings.states.toasts.error.title"),
-        message: t("work_item_types.settings.states.toasts.error.message"),
+        title: t("work_item_types.states.toasts.error.title"),
+        message: t("work_item_types.states.toasts.error.message"),
       });
     } finally {
       setIsSaving(false);
@@ -107,7 +107,7 @@ export const TypeStatesSection = observer(function TypeStatesSection(props: TTyp
     <div className="flex flex-col gap-3">
       {/* section header + save */}
       <div className="flex items-center justify-between gap-4">
-        <span className="text-body-sm-medium text-secondary">{t("work_item_types.settings.states.title")}</span>
+        <span className="text-body-sm-medium text-secondary">{t("work_item_types.states.title")}</span>
         {canPerformActions && (
           <Button
             type="button"
@@ -121,9 +121,9 @@ export const TypeStatesSection = observer(function TypeStatesSection(props: TTyp
           />
         )}
       </div>
-      <p className="text-caption-md-regular text-tertiary">{t("work_item_types.settings.states.description")}</p>
+      <p className="text-caption-md-regular text-tertiary">{t("work_item_types.states.description")}</p>
       {!canPerformActions && (
-        <p className="text-caption-md-regular text-tertiary">{t("work_item_types.settings.states.readonly_hint")}</p>
+        <p className="text-caption-md-regular text-tertiary">{t("work_item_types.states.readonly_hint")}</p>
       )}
 
       {/* state pool with per-state checkboxes */}
@@ -156,8 +156,8 @@ export const TypeStatesSection = observer(function TypeStatesSection(props: TTyp
       {/* inherit-all hint (CE 自拟文案，产品方案 A2/A7) */}
       <p className="text-caption-md-regular text-tertiary">
         {selectedStateIds.length === 0
-          ? t("work_item_types.settings.states.inherit_hint.active")
-          : t("work_item_types.settings.states.inherit_hint.configured")}
+          ? t("work_item_types.states.inherit_hint.active")
+          : t("work_item_types.states.inherit_hint.configured")}
       </p>
     </div>
   );
