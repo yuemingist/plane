@@ -60,6 +60,41 @@ export class IssueTypeService extends APIService {
       });
   }
 
+  /**
+   * Available state ids for a work item type (Step02 segment 5). Empty list = inherits
+   * the full project state pool (`inherits_all` flag mirrors that).
+   */
+  async getWorkItemTypeStates(
+    workspaceSlug: string,
+    projectId: string,
+    issueTypeId: string
+  ): Promise<{ state_ids: string[]; inherits_all: boolean }> {
+    return this.get(`${this.resourceUrl(workspaceSlug, projectId)}${issueTypeId}/states/`)
+      .then((response) => response?.data)
+      .catch((error) => {
+        throw error?.response?.data;
+      });
+  }
+
+  /**
+   * Full replacement of the available state set (PUT). Empty array clears the
+   * configuration, restoring "inherit the full project state pool".
+   */
+  async updateWorkItemTypeStates(
+    workspaceSlug: string,
+    projectId: string,
+    issueTypeId: string,
+    stateIds: string[]
+  ): Promise<{ state_ids: string[]; inherits_all: boolean }> {
+    return this.put(`${this.resourceUrl(workspaceSlug, projectId)}${issueTypeId}/states/`, {
+      state_ids: stateIds,
+    })
+      .then((response) => response?.data)
+      .catch((error) => {
+        throw error?.response?.data;
+      });
+  }
+
   async markDefaultWorkItemType(workspaceSlug: string, projectId: string, issueTypeId: string): Promise<void> {
     return this.post(`${this.resourceUrl(workspaceSlug, projectId)}${issueTypeId}/mark-default/`, {})
       .then((response) => response?.data)

@@ -62,4 +62,7 @@ export interface IWorkflowTransitionError {
   code?: string;
   from_state_name?: string;
   to_state_name?: string;
+  /** Step02 segment 5: type available-state guard error body. */
+  type_name?: string;
+  state_name?: string;
 }

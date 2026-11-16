@@ -455,7 +455,30 @@
         }
       }
     },
-    "switch_entry": "Switch work item type"
+    "switch_entry": "Switch work item type",
+    "states": {
+      "title": "Available states",
+      "description": "Pick the states this work item type can use in the project.",
+      "readonly_hint": "You do not have permission to edit available states.",
+      "inherit_hint": {
+        "active": "No states selected — this type can use all of the project's states.",
+        "configured": "Only the selected states are available for this type. Clear all selections to use the full pool again."
+      },
+      "toasts": {
+        "success": {
+          "title": "Success",
+          "message": "Available states updated."
+        },
+        "error": {
+          "title": "Error",
+          "message": "Available states could not be updated. Please try again."
+        }
+      }
+    },
+    "state_not_allowed_toast": {
+      "title": "Cannot use this state",
+      "message": "\"{state}\" is not among the available states of the \"{type}\" work item type."
+    }
   },
   "work_item_type_hierarchy": {
     "settings": {

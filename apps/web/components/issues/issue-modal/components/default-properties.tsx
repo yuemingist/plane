@@ -32,6 +32,7 @@ import { ParentIssuesListModal } from "@/components/issues/parent-issues-list-mo
 import { IssueIdentifier } from "@/components/issues/issue-detail/issue-identifier";
 // hooks
 import { useProjectEstimates } from "@/hooks/store/estimates";
+import { useIssueType } from "@/hooks/store/use-issue-type";
 import { useProject } from "@/hooks/store/use-project";
 import { useProjectState } from "@/hooks/store/use-project-state";
 import { useUserProfile } from "@/hooks/store/user";
@@ -42,6 +43,8 @@ type TIssueDefaultPropertiesProps = {
   id: string | undefined;
   projectId: string | null;
   workspaceSlug: string;
+  /** Selected work item type id — drives the per-type available-state filtering (Step02 segment 5). */
+  typeId: string | null | undefined;
   selectedParentIssue: ISearchIssueResponse | null;
   startDate: string | null;
   targetDate: string | null;
@@ -57,6 +60,7 @@ export const IssueDefaultProperties = observer(function IssueDefaultProperties(p
     id,
     projectId,
     workspaceSlug,
+    typeId,
     selectedParentIssue,
     startDate,
     targetDate,
@@ -72,6 +76,7 @@ export const IssueDefaultProperties = observer(function IssueDefaultProperties(p
   const { areEstimateEnabledByProjectId } = useProjectEstimates();
   const { getProjectById } = useProject();
   const { getProjectDefaultStateId } = useProjectState();
+  const { getAllowedStateIds } = useIssueType();
   const { isMobile } = usePlatformOS();
   const { data: userProfile } = useUserProfile();
   // derived values
@@ -100,6 +105,8 @@ export const IssueDefaultProperties = observer(function IssueDefaultProperties(p
               handleFormChange();
             }}
             projectId={projectId ?? undefined}
+            // 段 5：状态下拉按所选类型可用状态集合过滤（空集合 = 全量不过滤）
+            allowedStateIds={getAllowedStateIds(typeId)}
             variant="pill-md"
             tabIndex={getIndex("state_id")}
           />
