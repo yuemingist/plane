@@ -33,6 +33,8 @@ export interface IPartialProject {
   guest_view_all_features?: boolean;
   /** one-way gate for the work item types module (mirrors Project.is_issue_type_enabled) */
   is_issue_type_enabled?: boolean;
+  /** feature toggle consumed by the time-tracking settings page (mirrors Project.is_time_tracking_enabled) */
+  is_time_tracking_enabled?: boolean;
   project_lead?: IUserLite | string | null;
   network?: number;
   // Timestamps
