@@ -604,6 +604,21 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
           ),
         });
       }
+      // 类型可用状态校验被拒（段 5）：改状态或切类型被拒，回滚已由上面完成，
+      // 给出可读的专用提示（文案为 CE 自拟，标假设——段 5 产品方案 A7）。
+      if (errorData?.code === "issue_type_state_not_allowed") {
+        const i18n = getI18n();
+        setToast({
+          type: "error",
+          title: String(i18n.t("work_item_types.state_not_allowed_toast.title")),
+          message: String(
+            i18n.t("work_item_types.state_not_allowed_toast.message", {
+              type: errorData?.type_name ?? "",
+              state: errorData?.state_name ?? "",
+            })
+          ),
+        });
+      }
       throw error;
     }
   }

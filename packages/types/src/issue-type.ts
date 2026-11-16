@@ -20,6 +20,11 @@ export interface IIssueType {
   is_default: boolean;
   /** project-scoped computed count of work items using this type */
   issues_count: number;
+  /**
+   * Available state ids for this type within the project (bridge M2M, Step02 segment 5).
+   * An empty array means "not configured" — the type inherits the full project state pool.
+   */
+  state_ids: string[];
   created_at: string;
   updated_at: string;
 }

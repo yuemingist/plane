@@ -33,7 +33,16 @@ from plane.app.serializers import (
     WorkflowSerializer,
     WorkflowTransitionSerializer,
 )
-from plane.db.models import Project, State, Workflow, WorkflowChangeAction, WorkflowChangeLog, WorkflowTransition
+from plane.db.models import (
+    IssueType,
+    Project,
+    ProjectIssueType,
+    State,
+    Workflow,
+    WorkflowChangeAction,
+    WorkflowChangeLog,
+    WorkflowTransition,
+)
 
 
 def validate_state_transition(project_id, from_state_id, to_state_id) -> dict | None:
@@ -72,6 +81,50 @@ def validate_state_transition(project_id, from_state_id, to_state_id) -> dict | 
         "code": "workflow_transition_not_allowed",
         "from_state_name": from_state_name,
         "to_state_name": to_state_name,
+    }
+
+
+def validate_state_allowed_for_type(project_id, type_id, state_id) -> dict | None:
+    """类型可用状态校验（Step02 段 5，技术方案 §2.3）。
+
+    语义（段 5 产品方案 A2/A9）：工作项类型配置了可用状态集合时，目标状态必须
+    在集合内；类型为空 / 桥不存在 / 集合为空（继承项目全量状态池）→ 放行。
+    软删状态的陈旧引用在集合读取时被过滤（A9）。
+
+    返回 None=放行；返回 dict=拒绝（错误体含 code 与类型/状态名，供前端 i18n toast）。
+    只读查询，不写任何留痕。与段 3 validate_state_transition 串联：
+    先可用集合（本函数）后流转规则，错误码区分（产品方案 A3）。
+    """
+    if not type_id or not state_id:
+        return None
+
+    try:
+        state_uuid = UUID(str(state_id))
+    except ValueError:
+        # 非法 UUID 交给序列化器既有校验兜底
+        return None
+
+    bridge = ProjectIssueType.objects.filter(
+        project_id=project_id, issue_type_id=type_id, deleted_at__isnull=True
+    ).first()
+    if bridge is None:
+        return None
+
+    allowed_state_ids = set(bridge.states.filter(deleted_at__isnull=True).values_list("id", flat=True))
+    # 空集合 = 继承项目全量状态池（白名单语义，产品方案 A2）
+    if not allowed_state_ids:
+        return None
+
+    if state_uuid in allowed_state_ids:
+        return None
+
+    type_name = IssueType.objects.filter(pk=type_id).values_list("name", flat=True).first()
+    state_name = State.objects.filter(pk=state_uuid).values_list("name", flat=True).first()
+    return {
+        "error": "This state is not available for this work item type.",
+        "code": "issue_type_state_not_allowed",
+        "type_name": type_name,
+        "state_name": state_name,
     }
 
 

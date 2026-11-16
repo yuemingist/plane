@@ -26,6 +26,12 @@ export interface IIssueTypeStore {
   getProjectIssueTypeIds: (projectId: string | null | undefined) => string[] | undefined;
   hasEpicType: (projectId: string | null | undefined) => boolean;
   areTypesFetched: (projectId: string | null | undefined) => boolean;
+  /**
+   * Allowed state ids for a type (Step02 segment 5). Returns `undefined` when the type
+   * is unknown or has no configured set (empty `state_ids` = inherit full project pool),
+   * so consumers treat `undefined` as "no filtering".
+   */
+  getAllowedStateIds: (typeId: string | null | undefined) => string[] | undefined;
   // fetch actions
   fetchProjectWorkItemTypes: (workspaceSlug: string, projectId: string) => Promise<IIssueType[]>;
   // crud actions
@@ -38,6 +44,12 @@ export interface IIssueTypeStore {
   ) => Promise<IIssueType>;
   deleteWorkItemType: (workspaceSlug: string, projectId: string, issueTypeId: string) => Promise<void>;
   markWorkItemTypeAsDefault: (workspaceSlug: string, projectId: string, issueTypeId: string) => Promise<void>;
+  updateWorkItemTypeStates: (
+    workspaceSlug: string,
+    projectId: string,
+    issueTypeId: string,
+    stateIds: string[]
+  ) => Promise<{ state_ids: string[]; inherits_all: boolean }>;
   enableWorkItemTypes: (workspaceSlug: string, projectId: string) => Promise<void>;
 }
 
@@ -61,6 +73,7 @@ export class IssueTypeStore implements IIssueTypeStore {
       updateWorkItemType: action,
       deleteWorkItemType: action,
       markWorkItemTypeAsDefault: action,
+      updateWorkItemTypeStates: action,
       enableWorkItemTypes: action,
     });
     this.issueTypeService = new IssueTypeService();
@@ -122,6 +135,17 @@ export class IssueTypeStore implements IIssueTypeStore {
   areTypesFetched = computedFn((projectId: string | null | undefined) => {
     if (!projectId) return false;
     return !!this.fetchedMap[projectId];
+  });
+
+  /**
+   * Allowed state ids of a type (Step02 segment 5). `undefined` = no filtering
+   * (unknown type or empty configured set = inherit the full project state pool)
+   */
+  getAllowedStateIds = computedFn((typeId: string | null | undefined) => {
+    if (!typeId) return undefined;
+    const type = this.typeMap[typeId];
+    if (!type || !type.state_ids?.length) return undefined;
+    return type.state_ids;
   });
 
   /**
@@ -215,6 +239,42 @@ export class IssueTypeStore implements IIssueTypeStore {
     } catch (error) {
       runInAction(() => {
         this.typeMap = originalTypes;
+      });
+      throw error;
+    }
+  };
+
+  /**
+   * Replaces the available state set of a type (Step02 segment 5); on failure the
+   * previous snapshot is restored
+   */
+  updateWorkItemTypeStates = async (
+    workspaceSlug: string,
+    projectId: string,
+    issueTypeId: string,
+    stateIds: string[]
+  ) => {
+    const originalType = this.typeMap[issueTypeId];
+    try {
+      runInAction(() => {
+        set(this.typeMap, [issueTypeId], { ...this.typeMap?.[issueTypeId], state_ids: stateIds });
+      });
+      const response = await this.issueTypeService.updateWorkItemTypeStates(
+        workspaceSlug,
+        projectId,
+        issueTypeId,
+        stateIds
+      );
+      runInAction(() => {
+        set(this.typeMap, [issueTypeId], { ...this.typeMap?.[issueTypeId], state_ids: response.state_ids });
+      });
+      return response;
+    } catch (error) {
+      runInAction(() => {
+        this.typeMap = {
+          ...this.typeMap,
+          [issueTypeId]: originalType,
+        };
       });
       throw error;
     }

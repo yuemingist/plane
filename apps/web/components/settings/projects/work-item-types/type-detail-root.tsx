@@ -19,6 +19,7 @@ import { useIssueType } from "@/hooks/store/use-issue-type";
 // local imports
 import { CreateTypeModal } from "./create-type-modal";
 import { TypePropertiesSection } from "./type-properties-section";
+import { TypeStatesSection } from "./type-states-section";
 import { TypeIcon } from "./type-icon";
 
 type TTypeDetailRootProps = {
@@ -162,6 +163,9 @@ export const TypeDetailRoot = observer(function TypeDetailRoot(props: TTypeDetai
 
       {/* properties section (Step02 段 2: bound property management, 57 号 §3.4) */}
       <TypePropertiesSection workspaceSlug={workspaceSlug} projectId={projectId} typeId={issueTypeId} />
+
+      {/* available states section (Step02 段 5: per-type available-state set, 产品方案 §2.1) */}
+      <TypeStatesSection workspaceSlug={workspaceSlug} projectId={projectId} typeId={issueTypeId} />
 
       {isEditModalOpen && (
         <CreateTypeModal

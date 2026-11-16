@@ -33,7 +33,7 @@ from rest_framework.response import Response
 
 # Module imports
 from plane.app.permissions import ROLE, allow_permission
-from plane.app.views.workflow import validate_state_transition
+from plane.app.views.workflow import validate_state_allowed_for_type, validate_state_transition
 from plane.app.serializers import (
     IssueCreateSerializer,
     IssueDetailSerializer,
@@ -417,6 +417,15 @@ class IssueViewSet(BaseViewSet):
     def create(self, request, slug, project_id):
         project = Project.objects.get(pk=project_id)
 
+        # 类型可用状态校验（Step02 段 5，技术方案 §2.4）：仅当新建显式携带 type 与 state
+        # 且两者组合时介入；未显式选 state（落项目默认状态）不校验（产品方案 A6）。
+        create_state_id = request.data.get("state_id") or request.data.get("state")
+        create_type_id = request.data.get("type_id") or request.data.get("type")
+        if create_state_id and create_type_id:
+            type_error = validate_state_allowed_for_type(project_id, create_type_id, create_state_id)
+            if type_error is not None:
+                return Response(type_error, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = IssueCreateSerializer(
             data=request.data,
             context={
@@ -690,7 +699,29 @@ class IssueViewSet(BaseViewSet):
         # 流转规则校验（Step02 段 3，技术方案 §2.1）：仅当请求试图变更 state 时介入；
         # 被拒直接 400，不进 serializer.save、不触发 issue_activity（既有留痕行为不变）。
         requested_state_id = request.data.get("state_id") or request.data.get("state")
+        requested_type_id = request.data.get("type_id") or request.data.get("type")
+        type_changed = bool(requested_type_id and str(requested_type_id) != str(issue.type_id))
+
+        # 类型可用状态校验（Step02 段 5，技术方案 §2.4）：
+        # 顺序全局统一为「先可用集合（段 5）后流转规则（段 3）」，错误码区分（产品方案 A3）。
+        # 切换类型（未同时改 state）：校验当前状态 ∈ 新类型可用集合，不过则拒绝（A4 拒绝式）。
+        if type_changed:
+            target_state_id = (
+                requested_state_id
+                if (requested_state_id and str(requested_state_id) != str(issue.state_id))
+                else issue.state_id
+            )
+            type_error = validate_state_allowed_for_type(project_id, requested_type_id, target_state_id)
+            if type_error is not None:
+                return Response(type_error, status=status.HTTP_400_BAD_REQUEST)
+
         if requested_state_id and str(requested_state_id) != str(issue.state_id):
+            # 改状态（未切类型）：目标状态 ∈ 当前类型可用集合；已切类型时上面已按新类型校验，
+            # 此处跳过（避免用旧类型集合误拦跨类型变更）
+            if not type_changed:
+                type_error = validate_state_allowed_for_type(project_id, issue.type_id, requested_state_id)
+                if type_error is not None:
+                    return Response(type_error, status=status.HTTP_400_BAD_REQUEST)
             transition_error = validate_state_transition(project_id, issue.state_id, requested_state_id)
             if transition_error is not None:
                 return Response(transition_error, status=status.HTTP_400_BAD_REQUEST)

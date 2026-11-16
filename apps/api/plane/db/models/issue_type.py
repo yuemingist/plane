@@ -36,6 +36,14 @@ class ProjectIssueType(ProjectBaseModel):
     issue_type = models.ForeignKey("db.IssueType", related_name="project_issue_types", on_delete=models.CASCADE)
     level = models.PositiveIntegerField(default=0)
     is_default = models.BooleanField(default=False)
+    # Step02 段 5：该类型在项目内的可用状态集合（引用项目级 State 池，不新建状态实体）。
+    # 空集合 = 继承项目全量状态池（向后兼容：现网数据零影响，产品方案 A2）。
+    states = models.ManyToManyField(
+        "db.State",
+        blank=True,
+        related_name="project_issue_types",
+        verbose_name="Available states",
+    )
 
     class Meta:
         unique_together = ["project", "issue_type", "deleted_at"]

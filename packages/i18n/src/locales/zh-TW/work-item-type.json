@@ -455,7 +455,30 @@
         }
       }
     },
-    "switch_entry": "Switch work item type"
+    "switch_entry": "Switch work item type",
+    "states": {
+      "title": "可用狀態",
+      "description": "為該類型挑選專案內可用的狀態。",
+      "readonly_hint": "你沒有編輯可用狀態的權限。",
+      "inherit_hint": {
+        "active": "未選擇任何狀態時，該類型可使用專案的全部狀態。",
+        "configured": "僅被勾選的狀態對該類型可用；清空全部勾選可恢復使用全部狀態。"
+      },
+      "toasts": {
+        "success": {
+          "title": "成功",
+          "message": "可用狀態已更新。"
+        },
+        "error": {
+          "title": "錯誤",
+          "message": "可用狀態更新失敗，請重試。"
+        }
+      }
+    },
+    "state_not_allowed_toast": {
+      "title": "無法使用該狀態",
+      "message": "「{state}」不在類型「{type}」的可用狀態內。"
+    }
   },
   "work_item_type_hierarchy": {
     "settings": {

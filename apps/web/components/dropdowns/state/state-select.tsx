@@ -31,6 +31,12 @@ type StateSelectWebProps = {
   className?: string;
   tooltip?: SelectTooltip;
   appendElement?: ReactNode;
+  /**
+   * Allowed state ids (Step02 segment 5, type available-state set). `undefined` = no
+   * filtering (inherit the full project pool). The selected state is always kept in the
+   * option list so the detail page never renders an empty value.
+   */
+  allowedStateIds?: string[];
   /** Forwarded to the block's trigger — see `StateSelectProps["testId"]` doc comment. */
   testId?: string;
   /** Tab order of the trigger, for forms that sequence focus explicitly (`ETabIndices`). */
@@ -66,6 +72,7 @@ export const StateSelect = observer(function StateSelect(props: StateSelectWebPr
     className,
     tooltip,
     appendElement,
+    allowedStateIds,
     testId,
     tabIndex,
   } = props;
@@ -96,11 +103,13 @@ export const StateSelect = observer(function StateSelect(props: StateSelectWebPr
       const results = (stateIds ?? [])
         .map((stateId) => getStateById(stateId))
         .filter((state): state is IState => !!state)
+        // Step02 段 5：按类型可用状态集合过滤；当前选中值始终保留（详情页防空白，产品方案 §2.2）
+        .filter((state) => !allowedStateIds?.length || state.id === value || allowedStateIds.includes(state.id))
         .filter((state) => !query || state.name.toLowerCase().includes(query))
         .map(toOption);
       return { results, next_page_results: false };
     },
-    [workspaceSlug, projectId, getProjectStateIds, fetchProjectStates, getStateById]
+    [workspaceSlug, projectId, getProjectStateIds, fetchProjectStates, getStateById, allowedStateIds, value]
   );
 
   // Resolved in the observer render (not in a memo) so MobX re-renders when the state loads.

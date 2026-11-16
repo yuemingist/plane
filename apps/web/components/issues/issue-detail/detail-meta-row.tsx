@@ -16,6 +16,7 @@ import { PrioritySelect } from "@/components/dropdowns/priority/priority-select"
 import { StateSelect } from "@/components/dropdowns/state/state-select";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
+import { useIssueType } from "@/hooks/store/use-issue-type";
 import { useProjectState } from "@/hooks/store/use-project-state";
 import { useUserProfile } from "@/hooks/store/user";
 // local imports
@@ -45,6 +46,7 @@ export const IssueDetailMetaRow = observer(function IssueDetailMetaRow(props: Pr
     issue: { getIssueById },
   } = useIssueDetail();
   const { getStateById } = useProjectState();
+  const { getAllowedStateIds } = useIssueType();
   const { data: userProfile } = useUserProfile();
   // derived values
   const issue = getIssueById(issueId);
@@ -63,6 +65,8 @@ export const IssueDetailMetaRow = observer(function IssueDetailMetaRow(props: Pr
             value={issue.state_id}
             onChange={(val) => issueOperations.update(workspaceSlug, projectId, issueId, { state_id: val })}
             projectId={projectId}
+            // 段 5：状态下拉按类型可用状态集合过滤（空集合 = 全量不过滤）
+            allowedStateIds={getAllowedStateIds(issue.type_id)}
             disabled={disabled}
             variant="select-ghost-lg"
             tooltip
