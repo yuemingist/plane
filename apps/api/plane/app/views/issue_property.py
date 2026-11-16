@@ -351,6 +351,9 @@ class IssuePropertyValueViewSet(WorkItemTypeFeatureGateMixin, BaseViewSet):
                 )
 
         with transaction.atomic():
+            # 行锁串行化同一工作项的并发 upsert：否则 filter-then-create 在并发下
+            # 同时通过存在性检查，撞 (issue, issue_property) 唯一约束 → IntegrityError（缺陷 #6）
+            Issue.objects.select_for_update().get(pk=issue.pk)
             for property_id, normalized_value in values.items():
                 property_ = properties[property_id]
                 if normalized_value is None:

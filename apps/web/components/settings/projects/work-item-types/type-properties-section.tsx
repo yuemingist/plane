@@ -88,7 +88,7 @@ export const TypePropertiesSection = observer(function TypePropertiesSection(pro
         title: t("work_item_types.settings.properties.toast.enable_disable.success.title"),
         message: t("work_item_types.settings.properties.toast.enable_disable.success.message", {
           name: confirmToggleProperty.name,
-          action: nextActive ? "enabled" : "disabled",
+          action: nextActive ? t("common.actions.enable").toLowerCase() : t("common.actions.disable").toLowerCase(),
         }),
       });
       setConfirmToggleProperty(undefined);
@@ -187,7 +187,7 @@ export const TypePropertiesSection = observer(function TypePropertiesSection(pro
                         size="sm"
                         stretch="auto"
                         label="…"
-                        aria-label={t("common.more")}
+                        aria-label={t("aria_labels.common.more_actions")}
                       />
                     }
                   />
