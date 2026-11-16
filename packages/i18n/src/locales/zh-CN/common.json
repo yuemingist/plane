@@ -423,6 +423,7 @@
     }
   },
   "common": {
+    "save": "保存",
     "all": "全部",
     "no_items_in_this_group": "此组中没有项目",
     "drop_here_to_move": "拖放到此处以移动",

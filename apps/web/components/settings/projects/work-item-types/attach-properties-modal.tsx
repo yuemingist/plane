@@ -52,12 +52,17 @@ export const AttachPropertiesModal = observer(function AttachPropertiesModal(pro
   const { t } = useTranslation();
   const { getPropertiesByProjectId, arePropertiesFetched, fetchProjectProperties, bindProperties } = useIssueProperty();
   // derived values
+  // 缺陷 #7 根因：useMemo 依赖里没有 store 的响应式读取结果——直载类型详情时池在弹窗
+  // 打开后才加载完成，首次渲染算出的空数组被 memo 缓存，池到位后依赖不变不重算，
+  // 空态误报「所有属性均已关联」。改为渲染期先读 store（observer 据此追踪重渲染），
+  // 再以读到的数组引用作为 memo 依赖做过滤。
+  const projectProperties = getPropertiesByProjectId(projectId);
   const availableProperties = useMemo(
     () =>
-      (getPropertiesByProjectId(projectId) ?? [])
+      (projectProperties ?? [])
         .filter((property) => !boundPropertyIds.includes(property.id))
         .filter((property) => property.name.toLowerCase().includes(searchQuery.trim().toLowerCase())),
-    [getPropertiesByProjectId, projectId, boundPropertyIds, searchQuery]
+    [projectProperties, boundPropertyIds, searchQuery]
   );
 
   // 类型详情页直开时属性池可能尚未加载：兜底拉取（fetch 幂等，store fetchedMap 门控）
