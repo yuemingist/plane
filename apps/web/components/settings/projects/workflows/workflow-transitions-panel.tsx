@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { observer } from "mobx-react";
 import useSWR from "swr";
 // plane imports
@@ -33,9 +33,9 @@ export const WorkflowTransitionsPanel = observer(function WorkflowTransitionsPan
   props: TWorkflowTransitionsPanelProps
 ) {
   const { workspaceSlug, projectId, workflowId } = props;
-  // states: 本地勾选矩阵 / 服务端已保存快照（脏判定基准）
+  // states: 本地勾选矩阵 / 用户是否改动过（保存按钮门控）
   const [allowedMap, setAllowedMap] = useState<Record<string, string[]> | undefined>(undefined);
-  const [savedMap, setSavedMap] = useState<Record<string, string[]>>({});
+  const [hasEdits, setHasEdits] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // hooks
   const { t } = useTranslation();
@@ -71,26 +71,15 @@ export const WorkflowTransitionsPanel = observer(function WorkflowTransitionsPan
         grouped[row.from_state] = [...(grouped[row.from_state] ?? []), row.to_state];
       });
       setAllowedMap(grouped);
-      setSavedMap(grouped);
+      setHasEdits(false);
       return rows;
     },
     { revalidateIfStale: false, revalidateOnFocus: false }
   );
 
-  const isDirty = useMemo(() => {
-    if (allowedMap === undefined) return false;
-    const normalize = (map: Record<string, string[]>) =>
-      JSON.stringify(
-        Object.keys(map)
-          .filter((key) => map[key].length > 0)
-          .toSorted()
-          .map((key) => [key, [...map[key]].toSorted()])
-      );
-    return normalize(allowedMap) !== normalize(savedMap);
-  }, [allowedMap, savedMap]);
-
   const handleToggle = (fromStateId: string, toStateId: string) => {
     if (fromStateId === toStateId) return;
+    setHasEdits(true);
     setAllowedMap((previous) => {
       const current = previous?.[fromStateId] ?? [];
       const next = current.includes(toStateId) ? current.filter((id) => id !== toStateId) : [...current, toStateId];
@@ -111,7 +100,7 @@ export const WorkflowTransitionsPanel = observer(function WorkflowTransitionsPan
         grouped[row.from_state] = [...(grouped[row.from_state] ?? []), row.to_state];
       });
       setAllowedMap(grouped);
-      setSavedMap(grouped);
+      setHasEdits(false);
       setToast({
         type: "success",
         title: t("workflows.settings.transitions.toasts.success.title"),
@@ -182,7 +171,7 @@ export const WorkflowTransitionsPanel = observer(function WorkflowTransitionsPan
           size="sm"
           stretch="auto"
           loading={isSubmitting}
-          disabled={!isDirty}
+          disabled={!hasEdits}
           label={t("common.save")}
           onClick={() => void handleSave()}
         />
