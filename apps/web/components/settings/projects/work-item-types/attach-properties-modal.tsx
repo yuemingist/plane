@@ -6,6 +6,7 @@
 
 import { useMemo, useState } from "react";
 import { observer } from "mobx-react";
+import useSWR from "swr";
 import {
   Dialog,
   DialogActions,
@@ -38,6 +39,8 @@ type TAttachPropertiesModalProps = {
 /**
  * 「添加属性」弹窗（57 号 §3.4 步骤 2）：搜索框 + 属性行
  * （复选框 + 状态 badge + 类型 badge）+ 取消/添加（未选时禁用），多选。
+ * 候选列表来自项目属性池：本弹窗可能在类型详情页直接打开（属性池未加载过），
+ * 打开时兜底拉取，避免误报「所有属性均已关联」（缺陷 #3）。
  */
 export const AttachPropertiesModal = observer(function AttachPropertiesModal(props: TAttachPropertiesModalProps) {
   const { workspaceSlug, projectId, typeId, boundPropertyIds, onClose } = props;
@@ -47,7 +50,7 @@ export const AttachPropertiesModal = observer(function AttachPropertiesModal(pro
   const [isSubmitting, setIsSubmitting] = useState(false);
   // hooks
   const { t } = useTranslation();
-  const { getPropertiesByProjectId, bindProperties } = useIssueProperty();
+  const { getPropertiesByProjectId, arePropertiesFetched, fetchProjectProperties, bindProperties } = useIssueProperty();
   // derived values
   const availableProperties = useMemo(
     () =>
@@ -55,6 +58,17 @@ export const AttachPropertiesModal = observer(function AttachPropertiesModal(pro
         .filter((property) => !boundPropertyIds.includes(property.id))
         .filter((property) => property.name.toLowerCase().includes(searchQuery.trim().toLowerCase())),
     [getPropertiesByProjectId, projectId, boundPropertyIds, searchQuery]
+  );
+
+  // 类型详情页直开时属性池可能尚未加载：兜底拉取（fetch 幂等，store fetchedMap 门控）
+  useSWR(
+    workspaceSlug && projectId ? `ATTACH_PROPERTIES_MODAL_POOL_${workspaceSlug}_${projectId}` : null,
+    async () => {
+      if (workspaceSlug && projectId && !arePropertiesFetched(projectId)) {
+        await fetchProjectProperties(workspaceSlug, projectId);
+      }
+    },
+    { revalidateIfStale: false, revalidateOnFocus: false }
   );
 
   const handleAdd = async () => {
@@ -125,15 +139,22 @@ export const AttachPropertiesModal = observer(function AttachPropertiesModal(pro
               ))}
               {availableProperties.length === 0 && (
                 <div className="flex flex-col items-center gap-1 px-3 py-6 text-center">
-                  <p className="text-body-sm-medium text-secondary">
-                    {searchQuery
-                      ? t("work_item_types.settings.linked_properties.modal.empty_search")
-                      : t("work_item_types.settings.linked_properties.modal.empty.title")}
-                  </p>
-                  {!searchQuery && (
-                    <p className="text-caption-md-regular text-tertiary">
-                      {t("work_item_types.settings.linked_properties.modal.empty.description")}
-                    </p>
+                  {!arePropertiesFetched(projectId) ? (
+                    // 属性池加载中：不能显示「所有属性均已关联」误报文案（缺陷 #3）
+                    <p className="text-caption-md-regular text-tertiary">{t("common.loading")}</p>
+                  ) : (
+                    <>
+                      <p className="text-body-sm-medium text-secondary">
+                        {searchQuery
+                          ? t("work_item_types.settings.linked_properties.modal.empty_search")
+                          : t("work_item_types.settings.linked_properties.modal.empty.title")}
+                      </p>
+                      {!searchQuery && (
+                        <p className="text-caption-md-regular text-tertiary">
+                          {t("work_item_types.settings.linked_properties.modal.empty.description")}
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
               )}

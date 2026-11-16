@@ -104,14 +104,18 @@ export const PropertiesTab = observer(function PropertiesTab(props: TPropertiesT
         message: t("work_item_types.settings.properties.toast.delete.success.message", { name: property.name }),
       });
     } catch (errorData) {
-      const errorStatus = errorData as { status?: number; error?: string };
+      // service 层 throw 的是 response.data（{error: string}，无 status 字段），
+      // 需同时兜底后端 detail 文案才能命中 400 使用中约束（缺陷 #4）
+      const errorPayload = errorData as { status?: number; error?: string };
+      const isBoundError =
+        errorPayload?.status === 400 ||
+        (typeof errorPayload?.error === "string" && errorPayload.error.includes("still bound"));
       setToast({
         type: "error",
         title: t("work_item_types.settings.properties.toast.delete.error.title"),
-        message:
-          errorStatus?.status === 400
-            ? t("work_item_types.settings.properties.delete_confirmation.bound_error")
-            : t("work_item_types.settings.properties.toast.delete.error.message"),
+        message: isBoundError
+          ? t("work_item_types.settings.properties.delete_confirmation.bound_error")
+          : t("work_item_types.settings.properties.toast.delete.error.message"),
       });
     }
   };
@@ -124,7 +128,7 @@ export const PropertiesTab = observer(function PropertiesTab(props: TPropertiesT
         title: t("work_item_types.settings.properties.toast.enable_disable.success.title"),
         message: t("work_item_types.settings.properties.toast.enable_disable.success.message", {
           name: property.name,
-          action: nextActive ? "enabled" : "disabled",
+          action: nextActive ? t("common.actions.enable").toLowerCase() : t("common.actions.disable").toLowerCase(),
         }),
       });
     } catch {
@@ -171,7 +175,10 @@ export const PropertiesTab = observer(function PropertiesTab(props: TPropertiesT
             size="md"
             stretch="auto"
             label={t("work_item_types.settings.properties.add_button")}
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => {
+              setEditingProperty(undefined);
+              setIsCreateModalOpen(true);
+            }}
           />
         )}
       </div>
@@ -254,12 +261,12 @@ export const PropertiesTab = observer(function PropertiesTab(props: TPropertiesT
         )}
       </div>
 
-      {/* create / edit modal */}
-      {isCreateModalOpen && (
+      {/* create / edit modal（编辑入口单独打开：editingProperty 即弹窗开关，缺陷 #1） */}
+      {(isCreateModalOpen || !!editingProperty) && (
         <CreatePropertyModal
           workspaceSlug={workspaceSlug}
           projectId={projectId}
-          isOpen={isCreateModalOpen}
+          isOpen={isCreateModalOpen || !!editingProperty}
           onClose={() => {
             setIsCreateModalOpen(false);
             setEditingProperty(undefined);
