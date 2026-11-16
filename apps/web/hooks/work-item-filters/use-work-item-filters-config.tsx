@@ -44,6 +44,7 @@ import {
   getCreatedAtFilterConfig,
   getCreatedByFilterConfig,
   getCycleFilterConfig,
+  getCustomPropertyFilterConfig,
   getFileURL,
   getIssueTypeFilterConfig,
   getLabelFilterConfig,
@@ -70,6 +71,7 @@ import { useProject } from "@/hooks/store/use-project";
 import { useProjectState } from "@/hooks/store/use-project-state";
 // plane web imports
 import { useFiltersOperatorConfigs } from "@/hooks/rich-filters/use-filters-operator-configs";
+import { useProjectCustomProperties } from "@/hooks/use-project-custom-properties";
 // components
 import { TypeIcon } from "@/components/settings/projects/work-item-types/type-icon";
 
@@ -106,6 +108,8 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
     props;
   // store hooks
   const { loader: projectLoader, getProjectById } = useProject();
+  // 段 4 属性贯穿：项目已启用自定义属性 → 动态筛选 config
+  const { properties } = useProjectCustomProperties(workspaceSlug, projectId);
   const { getCycleById } = useCycle();
   const { getLabelById } = useLabel();
   const { getModuleById } = useModule();
@@ -409,6 +413,38 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
     [isFilterEnabled, projectIssueTypes, operatorConfigs]
   );
 
+  // 段 4 属性贯穿：项目已启用的自定义属性逐个生成动态 config（键=customproperty_<id>）。
+  // 控件按属性类型分派（option=选项多选 / member=成员多选 / date=日期 / boolean=是否单选），
+  // text/decimal/url/rich_text 裁剪不出 config（产品方案 §3）。
+  const activeProperties = properties.filter((property) => property.is_active);
+  const customPropertyFilterIcon = (propertyType: string) => {
+    switch (propertyType) {
+      case "option":
+        return LabelsOutline;
+      case "member":
+        return MembersOutline;
+      case "date":
+        return DueDateOutline;
+      default:
+        return EpicOutline;
+    }
+  };
+  const customPropertyFilterConfigs = useMemo(
+    () =>
+      activeProperties.map((property) =>
+        getCustomPropertyFilterConfig<TWorkItemFilterProperty>(`customproperty_${property.id}`)({
+          isEnabled: true,
+          property,
+          propertyDisplayName: property.name,
+          filterIcon: customPropertyFilterIcon(property.property_type),
+          members: members ?? [],
+          ...operatorConfigs,
+        })
+      ),
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- operatorConfigs/members 为稳定引用，属性清单变化时重算
+    [activeProperties, members, operatorConfigs]
+  );
+
   return {
     areAllConfigsInitialized,
     configs: [
@@ -423,6 +459,7 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
       moduleFilterConfig,
       issueTypeFilterConfig,
       parentTypeFilterConfig,
+      ...customPropertyFilterConfigs,
       startDateFilterConfig,
       targetDateFilterConfig,
       createdAtFilterConfig,

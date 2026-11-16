@@ -308,6 +308,9 @@ export const getComputedDisplayFilters = (
 export const getComputedDisplayProperties = (
   displayProperties: IIssueDisplayProperties = {}
 ): IIssueDisplayProperties => ({
+  // 动态键（issue_property_<id>）先透传，再被下方固定键的默认值覆盖——
+  // 避免自定义属性列开关被白名单剥掉（段 4 属性贯穿）
+  ...displayProperties,
   assignee: displayProperties?.assignee ?? true,
   start_date: displayProperties?.start_date ?? true,
   due_date: displayProperties?.due_date ?? true,

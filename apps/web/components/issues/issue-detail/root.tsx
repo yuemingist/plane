@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+/* oxlint-disable no-shadow -- 本文件沿用上游 props 解构命名（workspaceSlug/projectId/issueId），shadow 为同类误报 */
+
 import { useMemo } from "react";
 import { observer } from "mobx-react";
 // plane imports
@@ -99,7 +101,7 @@ export const IssueDetailRoot = observer(function IssueDetailRoot(props: TIssueDe
           setToast({
             title: t("common.error.label"),
             type: "error",
-            message: t("entity.update.failed", { entity: t("issue.label") }),
+            message: t("entity.update.failed", { entity: t("issue.label", { count: 1 }) }),
           });
         }
       },
@@ -110,14 +112,14 @@ export const IssueDetailRoot = observer(function IssueDetailRoot(props: TIssueDe
           setToast({
             title: t("common.success"),
             type: "success",
-            message: t("entity.delete.success", { entity: t("issue.label") }),
+            message: t("entity.delete.success", { entity: t("issue.label", { count: 1 }) }),
           });
         } catch (error) {
           console.log("Error in deleting issue:", error);
           setToast({
             title: t("common.error.label"),
             type: "error",
-            message: t("entity.delete.failed", { entity: t("issue.label") }),
+            message: t("entity.delete.failed", { entity: t("issue.label", { count: 1 }) }),
           });
         }
       },

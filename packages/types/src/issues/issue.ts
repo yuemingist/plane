@@ -77,6 +77,8 @@ export type TBaseIssue = {
   is_draft: boolean;
   is_epic?: boolean;
   is_intake?: boolean;
+  /** 自定义属性值（段 4 属性贯穿）：列表批量聚合返回，键=属性 id，值=rawJSON */
+  issue_property_values?: Record<string, unknown>;
 };
 
 type IssueRelation = {

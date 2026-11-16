@@ -5,6 +5,7 @@
  */
 
 export * from "./cycle";
+export * from "./custom-property";
 export * from "./date";
 export * from "./issue-type";
 export * from "./label";

@@ -16,6 +16,10 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from plane.utils.exception_logger import log_exception
 
+# 自定义属性筛选键前缀（段 4 属性贯穿）：`customproperty_<属性id>__<op>`。
+# 前端 rich filters 侧 shared-state adapter 已放行该前缀。
+CUSTOM_PROPERTY_FILTER_PREFIX = "customproperty_"
+
 
 class ComplexFilterBackend(filters.BaseFilterBackend):
     """
@@ -457,3 +461,78 @@ class ComplexFilterBackend(filters.BaseFilterBackend):
 
     def _is_scalar(self, value):
         return value is None or isinstance(value, (str, int, float, bool))
+
+
+class IssueComplexFilterBackend(ComplexFilterBackend):
+    """IssueViewSet / IssueListEndpoint 专用：在既有 ComplexFilterBackend 上放行
+    自定义属性筛选键（`customproperty_<id>__<op>`），其余行为与父类完全一致。
+
+    管线：_validate_fields 放行前缀键 → _preprocess_leaf_conditions 把属性键重写为
+    IssueFilterSet 的合成 method 过滤器（exact→custom_property_values、in→
+    custom_property_values__in），值编码 `<属性id>:<原值>`。
+    """
+
+    def _is_custom_property_key(self, key: str) -> bool:
+        return isinstance(key, str) and key.startswith(CUSTOM_PROPERTY_FILTER_PREFIX) and "__" in key
+
+    def _validate_fields(self, filter_data, view):
+        """父类校验之外，放行 customproperty_ 前缀键（合成键仍要求在 filterset 声明）。"""
+        filterset_class = getattr(view, "filterset_class", None)
+        allowed_fields = set(filterset_class.base_filters.keys()) if filterset_class else None
+        if not allowed_fields:
+            raise DRFValidationError(
+                {
+                    "message": ("Filtering is not enabled for this endpoint (missing filterset_class)"),
+                    "code": "filtering_not_enabled",
+                }
+            )
+
+        for field in self._extract_field_names(filter_data):
+            if self._is_custom_property_key(field):
+                # 属性键的结构校验：前缀内是非空属性 id，操作符非空
+                property_part, _, operator = field.rpartition("__")
+                if not property_part or property_part == CUSTOM_PROPERTY_FILTER_PREFIX or not operator:
+                    raise DRFValidationError(
+                        {
+                            "message": f"Invalid custom property filter key '{field}'",
+                            "code": "invalid_filter_field",
+                        }
+                    )
+                continue
+            if field not in allowed_fields:
+                raise DRFValidationError(
+                    {
+                        "message": f"Filtering on field '{field}' is not allowed",
+                        "code": "invalid_filter_field",
+                    }
+                )
+
+    def _preprocess_leaf_conditions(self, leaf_conditions, view, queryset):
+        """把 `customproperty_<id>__<op>` 重写为合成键，值编码 `<属性id>:<原值>`。
+
+        - `customproperty_<id>__exact`（或其它单值操作符）→ `custom_property_values` 列表追加
+        - `customproperty_<id>__in` → `custom_property_values__in` 列表追加（每项一条编码值）
+        多个属性条件在同一 leaf 内由 filterset 的 method 过滤器按「组间 AND」合并。
+        """
+        exact_values: list[str] = []
+        in_values: list[str] = []
+        passthrough: dict = {}
+
+        for key, value in leaf_conditions.items():
+            if not self._is_custom_property_key(key):
+                passthrough[key] = value
+                continue
+
+            property_part, _, operator = key.rpartition("__")
+            property_id = property_part[len(CUSTOM_PROPERTY_FILTER_PREFIX) :]
+            if operator == "in":
+                raw_values = value if isinstance(value, list) else [value]
+                in_values.extend(f"{property_id}:{item}" for item in raw_values)
+            else:
+                exact_values.append(f"{property_id}:{value}")
+
+        if exact_values:
+            passthrough["custom_property_values"] = exact_values
+        if in_values:
+            passthrough["custom_property_values__in"] = in_values
+        return passthrough

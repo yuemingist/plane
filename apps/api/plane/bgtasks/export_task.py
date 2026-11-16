@@ -24,6 +24,7 @@ from plane.db.models import ExporterHistory, Issue, IssueComment, IssueRelation,
 from plane.utils.exception_logger import log_exception
 from plane.utils.porters.exporter import DataExporter
 from plane.utils.porters.serializers.issue import IssueExportSerializer
+from plane.utils.property_values import attach_issue_property_export_columns
 
 
 def create_zip_file(files: List[tuple[str, str | bytes]]) -> io.BytesIO:
@@ -212,13 +213,15 @@ def issue_export_task(
             for project_id in project_ids:
                 project_issues = workspace_issues.filter(project_id=project_id)
                 export_filename = f"{slug}-{project_id}"
-                filename, content = exporter.export(export_filename, project_issues)
-                files.append((filename, content))
+                data = attach_issue_property_export_columns(exporter.serialize(project_issues), project_issues)
+                content = exporter.formatter.encode(data)
+                files.append((f"{export_filename}.{exporter.formatter.extension}", content))
         else:
             # Export all issues in a single file
             export_filename = f"{slug}-{workspace_id}"
-            filename, content = exporter.export(export_filename, workspace_issues)
-            files.append((filename, content))
+            data = attach_issue_property_export_columns(exporter.serialize(workspace_issues), workspace_issues)
+            content = exporter.formatter.encode(data)
+            files.append((f"{export_filename}.{exporter.formatter.extension}", content))
 
         zip_buffer = create_zip_file(files)
         upload_to_s3(zip_buffer, workspace_id, token_id, slug)

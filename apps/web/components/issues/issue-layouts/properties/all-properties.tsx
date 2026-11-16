@@ -17,6 +17,7 @@ import {
   DueDateOutline,
   EstimateOutline,
   LinkOutline,
+  ListOutline,
   ModuleOutline,
   StartDateOutline,
   SubWorkItemsOutline,
@@ -51,12 +52,15 @@ import { MemberSelect } from "@/components/dropdowns/member/member-select";
 import { ModuleSelect } from "@/components/dropdowns/module/module-select";
 import { PrioritySelect } from "@/components/dropdowns/priority/priority-select";
 import { StateSelect } from "@/components/dropdowns/state/state-select";
+import { CustomPropertyChip, getCustomPropertyDisplayText } from "./custom-property-chip";
 // hooks
 import { useProjectEstimates } from "@/hooks/store/estimates";
 import { useEstimate } from "@/hooks/store/estimates/use-estimate";
 import { useCycle } from "@/hooks/store/use-cycle";
 import { useIssues } from "@/hooks/store/use-issues";
+import { useIssueProperty } from "@/hooks/store/use-issue-property";
 import { useLabel } from "@/hooks/store/use-label";
+import { useMember } from "@/hooks/store/use-member";
 import { useProject } from "@/hooks/store/use-project";
 import { useProjectState } from "@/hooks/store/use-project-state";
 import { useUserProfile } from "@/hooks/store/user";
@@ -122,6 +126,10 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
   const { getStateById } = useProjectState();
   const { data: userProfile } = useUserProfile();
   const { isMobile } = usePlatformOS();
+  const { getActiveBoundPropertiesByTypeId } = useIssueProperty();
+  const {
+    project: { getProjectMemberDetails },
+  } = useMember();
   const projectDetails = getProjectById(issue.project_id);
 
   // router
@@ -674,6 +682,33 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
       },
     });
   }
+
+  // 段 4 属性贯穿：自定义属性列（按行 type 绑定 + 显示开关，紧凑只读形态）
+  const issuePropertyValues = issue.issue_property_values ?? {};
+  const activeBoundProperties = issue.type_id ? getActiveBoundPropertiesByTypeId(issue.type_id) : [];
+  activeBoundProperties.forEach((property) => {
+    const propertyKey = `issue_property_${property.id}` as keyof IIssueDisplayProperties;
+    if (!displayProperties[propertyKey]) return;
+    const value = issuePropertyValues[property.id];
+    const displayText = getCustomPropertyDisplayText(
+      property,
+      value,
+      issue.project_id ?? undefined,
+      getProjectMemberDetails
+    );
+
+    entries.push({
+      key: propertyKey,
+      hidePriority: getWorkItemPropertyHidePriority(propertyKey),
+      measureKey: displayText || property.id,
+      chip: <CustomPropertyChip property={property} value={value} projectId={issue.project_id ?? undefined} />,
+      menuRow: {
+        icon: <ListOutline className="size-4" />,
+        label: property.name,
+        preview: displayText || none,
+      },
+    });
+  });
 
   if (overflowBudgetPx !== undefined) {
     return (
