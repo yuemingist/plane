@@ -23,6 +23,8 @@ class IssueTypeSerializer(BaseSerializer):
     is_default = serializers.SerializerMethodField()
     issues_count = serializers.SerializerMethodField()
     level = serializers.SerializerMethodField()
+    # 段 5：可用状态集合（项目桥 M2M），只读透出；写走 PUT {pk}/states/ 全量替换端点
+    state_ids = serializers.SerializerMethodField()
 
     class Meta:
         model = IssueType
@@ -36,6 +38,7 @@ class IssueTypeSerializer(BaseSerializer):
             "level",
             "is_default",
             "issues_count",
+            "state_ids",
             "external_source",
             "external_id",
             "created_at",
@@ -46,6 +49,7 @@ class IssueTypeSerializer(BaseSerializer):
             "is_epic",
             "is_default",
             "issues_count",
+            "state_ids",
             "level",
             "external_source",
             "external_id",
@@ -68,6 +72,11 @@ class IssueTypeSerializer(BaseSerializer):
     def get_issues_count(self, instance) -> int:
         # 引用计数（「特性」列数据源），由 ViewSet annotate 注入；缺省 0
         return int(getattr(instance, "project_issues_count", 0) or 0)
+
+    def get_state_ids(self, instance) -> list:
+        # 段 5：类型可用状态集合（项目桥 M2M，ViewSet annotate 注入）；
+        # 空数组 = 未配置 = 继承项目全量状态池（产品方案 A2）
+        return [str(state_id) for state_id in (getattr(instance, "state_ids", None) or []) if state_id is not None]
 
     def validate(self, attrs):
         # 新建类型默认「已禁用」：model 默认 True，这里在序列化层覆盖（产品方案 §3.3）

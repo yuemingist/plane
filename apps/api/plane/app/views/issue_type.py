@@ -17,9 +17,16 @@
 - 启用为单向开关：enable 幂等（已启用直接返回现状，不报错、不重复建类型）。
 """
 
+# Python imports
+from uuid import UUID
+
 # Django imports
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.contrib.postgres.fields import ArrayField
 from django.db import transaction
-from django.db.models import BooleanField, F, Func, IntegerField, OuterRef, Subquery
+from django.db.models import BooleanField, F, Func, IntegerField, OuterRef, Q, Subquery, Value
+from django.db.models import UUIDField
+from django.db.models.functions import Coalesce
 
 # Third Party imports
 from rest_framework import status
@@ -30,7 +37,7 @@ from rest_framework.response import Response
 from .base import BaseViewSet
 from plane.app.permissions import ROLE, allow_permission
 from plane.app.serializers import IssueTypeSerializer, ProjectIssueTypeSerializer
-from plane.db.models import Issue, IssueType, Project, ProjectIssueType
+from plane.db.models import Issue, IssueType, Project, ProjectIssueType, State
 
 
 class WorkItemTypeFeatureGateMixin:
@@ -102,6 +109,29 @@ class WorkItemTypeViewSet(WorkItemTypeFeatureGateMixin, BaseViewSet):
             .values("count")[:1]
         )
 
+        # 段 5：类型可用状态集合（项目桥 M2M），空数组 = 未配置 = 继承项目全量状态池。
+        # 软删状态的陈旧引用在聚合时被过滤（产品方案 A9）
+        state_ids_subquery = (
+            ProjectIssueType.objects.filter(
+                issue_type=OuterRef("pk"),
+                project_id=project_id,
+                deleted_at__isnull=True,
+            )
+            .annotate(
+                arr=Coalesce(
+                    ArrayAgg(
+                        "states__id",
+                        distinct=True,
+                        # 排除 LEFT JOIN 的空扩展行（states__id IS NULL）与软删状态；
+                        # 无匹配行时 ArrayAgg 返回 NULL，由 Coalesce 兜底为空数组
+                        filter=~Q(states__id__isnull=True) & Q(states__deleted_at__isnull=True),
+                    ),
+                    Value([], output_field=ArrayField(UUIDField())),
+                )
+            )
+            .values("arr")[:1]
+        )
+
         return (
             IssueType.objects.filter(
                 workspace__slug=self.kwargs.get("slug"),
@@ -111,6 +141,7 @@ class WorkItemTypeViewSet(WorkItemTypeFeatureGateMixin, BaseViewSet):
             .annotate(project_is_default=Subquery(default_subquery, output_field=BooleanField()))
             .annotate(project_level=Subquery(level_subquery, output_field=IntegerField()))
             .annotate(project_issues_count=Subquery(issues_count_subquery, output_field=IntegerField()))
+            .annotate(state_ids=Subquery(state_ids_subquery))
             .order_by("project_level", "name")
         )
 
@@ -301,6 +332,79 @@ class WorkItemTypeViewSet(WorkItemTypeFeatureGateMixin, BaseViewSet):
 
     # 类型属性列表占位（Step01 恒空数组）已由段 2 IssueTypePropertyViewSet
     # 接管（app/views/issue_property.py），占位实现移除（技术方案 R2）。
+
+    def _get_bridge(self, project_id, issue_type):
+        return ProjectIssueType.objects.filter(
+            project_id=project_id,
+            issue_type=issue_type,
+            deleted_at__isnull=True,
+        ).first()
+
+    @staticmethod
+    def _states_payload(bridge) -> dict:
+        state_ids = sorted(
+            # 软删状态的陈旧引用不计入（产品方案 A9）
+            bridge.states.filter(deleted_at__isnull=True).values_list("id", flat=True)
+        )
+        return {"state_ids": [str(state_id) for state_id in state_ids], "inherits_all": not state_ids}
+
+    @allow_permission([ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST])
+    def states(self, request, slug, project_id, pk):
+        """该类型可用状态集合（段 5）：空集合 = 继承项目全量状态池（产品方案 A2）。"""
+        issue_type = self._get_annotated_instance(project_id, pk)
+        if issue_type is None:
+            return Response({"error": "Work item type not found"}, status=status.HTTP_404_NOT_FOUND)
+        bridge = self._get_bridge(project_id, issue_type)
+        return Response(self._states_payload(bridge) if bridge else {"state_ids": [], "inherits_all": True})
+
+    @allow_permission([ROLE.ADMIN, ROLE.MEMBER])
+    def replace_states(self, request, slug, project_id, pk):
+        """全量替换可用状态集合（段 5，技术方案 §2.2）。
+
+        body: {"state_ids": [...]}；空数组 = 清空 = 恢复继承全量。
+        - 每个 state 必须属本项目且未软删，非法 → 400；
+        - 事务内 bridge.states.set()（diff 替换）；
+        - 不写 WorkflowChangeLog（那是工作流域历史；类型域无历史面板，产品方案 §4）。
+        """
+        issue_type = self._get_annotated_instance(project_id, pk)
+        if issue_type is None:
+            return Response({"error": "Work item type not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        payload = request.data.get("state_ids") if isinstance(request.data, dict) else None
+        if not isinstance(payload, list):
+            return Response({"error": "state_ids must be a list of state ids"}, status=status.HTTP_400_BAD_REQUEST)
+
+        project_state_ids = set(
+            State.all_state_objects.filter(project_id=project_id, deleted_at__isnull=True).values_list("id", flat=True)
+        )
+        desired_ids = []
+        for state_id in payload:
+            if not isinstance(state_id, str):
+                return Response({"error": "state_ids must contain state ids"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                state_uuid = UUID(state_id)
+            except ValueError:
+                return Response({"error": "Invalid state id"}, status=status.HTTP_400_BAD_REQUEST)
+            if state_uuid not in project_state_ids:
+                return Response(
+                    {"error": "state is not a state of this project"}, status=status.HTTP_400_BAD_REQUEST
+                )
+            if state_uuid not in desired_ids:
+                desired_ids.append(state_uuid)
+
+        with transaction.atomic():
+            bridge = self._get_bridge(project_id, issue_type)
+            if bridge is None:
+                bridge = ProjectIssueType.objects.create(
+                    project_id=project_id,
+                    issue_type=issue_type,
+                    level=issue_type.level,
+                    is_default=False,
+                )
+            bridge.states.set(desired_ids)
+
+        bridge.refresh_from_db()
+        return Response(self._states_payload(bridge), status=status.HTTP_200_OK)
 
 
 class ProjectIssueTypeViewSet(WorkItemTypeFeatureGateMixin, BaseViewSet):

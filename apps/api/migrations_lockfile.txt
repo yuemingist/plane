@@ -4,6 +4,6 @@
 # A merge conflict here means another PR added a migration to the same app first:
 # merge preview, delete your migration, and run makemigrations again.
 
-db: 0128_step02_workflow_transition_rules
+db: 0129_step02_type_available_states
 
 license: 0006_instance_is_current_version_deprecated
