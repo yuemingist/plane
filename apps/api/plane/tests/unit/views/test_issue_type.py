@@ -398,35 +398,8 @@ class TestWorkItemTypeDeleteConstraints:
         assert not ProjectIssueType.objects.filter(issue_type=issue_type).exists()
 
 
-class TestWorkItemTypePropertiesPlaceholder:
-    """属性 tab 空态（决策 1A）：属性端点恒返回空数组"""
-
-    def test_properties_returns_empty_list(self, session_client, project):
-        project.is_issue_type_enabled = True
-        project.save(update_fields=["is_issue_type_enabled"])
-        issue_type = IssueType.objects.create(workspace=project.workspace, name="Typed", is_active=True)
-        ProjectIssueType.objects.create(project=project, issue_type=issue_type)
-
-        url = reverse(
-            "project-work-item-type-properties",
-            kwargs={"slug": project.workspace.slug, "project_id": str(project.id), "pk": str(issue_type.id)},
-        )
-        response = session_client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data == []
-
-    def test_properties_404_for_unbound_type(self, session_client, project):
-        project.is_issue_type_enabled = True
-        project.save(update_fields=["is_issue_type_enabled"])
-        # 工作区内存在但未绑定到该项目
-        issue_type = IssueType.objects.create(workspace=project.workspace, name="Ghost", is_active=True)
-
-        url = reverse(
-            "project-work-item-type-properties",
-            kwargs={"slug": project.workspace.slug, "project_id": str(project.id), "pk": str(issue_type.id)},
-        )
-        response = session_client.get(url)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
+# Step02 段 2：属性占位路由已由 IssueTypePropertyViewSet（真实绑定端点）接管，
+# 恒空数组占位测试移除，属性绑定行为见 test_issue_property.py。
 
 
 class TestProjectIssueTypeBinding:

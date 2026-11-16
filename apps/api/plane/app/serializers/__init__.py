@@ -140,4 +140,10 @@ from .draft import (
 from .issue_type import IssueTypeSerializer, ProjectIssueTypeSerializer
 
 # 工作流域（Step02 段 1 追赶 BE）
+from .issue_property import (
+    IssuePropertySerializer,
+    IssuePropertyValueSerializer,
+    IssueTypeIssuePropertySerializer,
+    validate_property_value,
+)
 from .workflow import WorkflowChangeLogSerializer, WorkflowSerializer
