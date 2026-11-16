@@ -43,7 +43,7 @@ export const WorkItemFiltersHOC = observer(function WorkItemFiltersHOC(props: TW
 type TWorkItemFilterProps = TSharedWorkItemFiltersProps &
   TAdditionalWorkItemFiltersProps & {
     initialWorkItemFilters: IIssueFilters;
-    children: React.ReactNode | ((props: { filter: IWorkItemFilterInstance }) => React.ReactNode);
+    children: React.ReactNode | ((props: { filter: IWorkItemFilterInstance | undefined }) => React.ReactNode);
   };
 
 const WorkItemFilterRoot = observer(function WorkItemFilterRoot(props: TWorkItemFilterProps) {
@@ -61,7 +61,7 @@ const WorkItemFilterRoot = observer(function WorkItemFilterRoot(props: TWorkItem
     ...entityConfigProps
   } = props;
   // store hooks
-  const { getOrCreateFilter, deleteFilter } = useWorkItemFilters();
+  const { getOrCreateFilter, deleteFilter, getFilter } = useWorkItemFilters();
   // derived values
   const workItemEntityID = useMemo(
     () => (isTemporary ? `TEMP-${entityId ?? uuidv4()}` : entityId),
@@ -73,9 +73,15 @@ const WorkItemFilterRoot = observer(function WorkItemFilterRoot(props: TWorkItem
     allowedFilters: filtersToShowByLayout ? filtersToShowByLayout : [],
     ...entityConfigProps,
   });
-  // get or create filter instance
-  const workItemLayoutFilter = useMemo(
-    () =>
+
+  // Own the filter instance lifecycle at the entity scope: create it on mount and delete it on
+  // unmount. React StrictMode (development only) runs mount effects as setup -> cleanup ->
+  // setup, so the simulated-unmount cleanup deletes the instance and the follow-up setup
+  // re-creates it, keeping the store consistent with the mounted tree. Registering from an
+  // effect (instead of during render) also keeps the store as the single source of truth: the
+  // render-time read below re-renders this observer whenever the instance is (re)created.
+  useEffect(
+    () => {
       getOrCreateFilter({
         entityType,
         entityId: workItemEntityID,
@@ -86,27 +92,43 @@ const WorkItemFilterRoot = observer(function WorkItemFilterRoot(props: TWorkItem
           updateViewOptions,
         },
         showOnMount,
-      }),
+      });
+      // delete filter instance when component unmounts
+      return () => {
+        deleteFilter(entityType, workItemEntityID);
+      };
+    },
+    // The instance must not be re-created (losing its local state) when the expression options
+    // change; those are synced to the existing instance by the effect underneath.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [entityType, workItemEntityID, saveViewOptions, updateViewOptions, updateFilters]
+    [deleteFilter, entityType, getOrCreateFilter, workItemEntityID]
   );
 
-  // delete filter instance when component unmounts
-  useEffect(
-    () => () => {
-      deleteFilter(entityType, workItemEntityID);
-    },
-    [deleteFilter, entityType, workItemEntityID]
-  );
+  // Keep the current instance's expression options and change callback up to date without
+  // resetting its lifecycle (mirrors the update path that the store's getOrCreateFilter takes
+  // for existing instances).
+  useEffect(() => {
+    const existingFilter = getFilter(entityType, workItemEntityID);
+    if (!existingFilter) return;
+    if (saveViewOptions || updateViewOptions) {
+      existingFilter.updateExpressionOptions({
+        saveViewOptions,
+        updateViewOptions,
+      });
+    }
+    if (updateFilters) {
+      existingFilter.onExpressionChange = updateFilters;
+    }
+  }, [entityType, getFilter, saveViewOptions, updateFilters, updateViewOptions, workItemEntityID]);
+
+  // read the instance from the store so this observer re-renders when it is (re)created
+  const workItemLayoutFilter = getFilter(entityType, workItemEntityID);
 
   useEffect(() => {
+    if (!workItemLayoutFilter) return;
     workItemLayoutFilter.configManager.setAreConfigsReady(workItemFiltersConfig.areAllConfigsInitialized);
     workItemLayoutFilter.configManager.registerAll(workItemFiltersConfig.configs);
-  }, [
-    workItemFiltersConfig.areAllConfigsInitialized,
-    workItemFiltersConfig.configs,
-    workItemLayoutFilter.configManager,
-  ]);
+  }, [workItemFiltersConfig.areAllConfigsInitialized, workItemFiltersConfig.configs, workItemLayoutFilter]);
 
   return <>{typeof children === "function" ? children({ filter: workItemLayoutFilter }) : children}</>;
 });
