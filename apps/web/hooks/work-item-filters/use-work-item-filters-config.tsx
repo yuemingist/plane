@@ -30,6 +30,7 @@ import { CycleGroupIcon, PriorityIcon, StateGroupIcon } from "@plane/blocks/icon
 import type {
   ICycle,
   IState,
+  IIssueType,
   IUserLite,
   TFilterConfig,
   IIssueLabel,
@@ -83,6 +84,9 @@ export type TWorkItemFiltersEntityProps = {
   stateIds?: string[];
 };
 
+// referentially stable empty list for the pre-fetch state (see projectIssueTypes below)
+const EMPTY_PROJECT_ISSUE_TYPES: IIssueType[] = [];
+
 export type TUseWorkItemFiltersConfigProps = {
   allowedFilters: TWorkItemFilterProperty[];
 } & TWorkItemFiltersEntityProps;
@@ -112,7 +116,13 @@ export const useWorkItemFiltersConfig = (props: TUseWorkItemFiltersConfigProps):
   const operatorConfigs = useFiltersOperatorConfigs({ workspaceSlug });
   const filtersToShow = useMemo(() => new Set(allowedFilters), [allowedFilters]);
   const project = useMemo(() => getProjectById(projectId), [projectId, getProjectById]);
-  const projectIssueTypes = useMemo(() => getTypesByProjectId(projectId) ?? [], [getTypesByProjectId, projectId]);
+  // Read the type list directly instead of via useMemo: the previous memo depended only on
+  // stable references (method + projectId), so it computed once before the type list arrived
+  // and the type configs stayed disabled forever — Type / Parent type never appeared in the
+  // filter menu (BUG-08 follow-up). `getTypesByProjectId` is a reactive computedFn read tracked
+  // by the enclosing observer, and it returns a stable reference until the store changes; the
+  // module-level fallback keeps the empty state referentially stable as well.
+  const projectIssueTypes = getTypesByProjectId(projectId) ?? EMPTY_PROJECT_ISSUE_TYPES;
   const members: IUserLite[] | undefined = useMemo(
     () =>
       memberIds

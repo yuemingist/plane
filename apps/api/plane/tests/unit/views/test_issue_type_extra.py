@@ -158,6 +158,26 @@ class TestIssueTypeFilters:
         assert set(filtered.values_list("id", flat=True)) == {child_of_epic.id}
         assert child_of_task.id not in set(filtered.values_list("id", flat=True))
 
+    def test_filterset_parent_type_id_in(self, project, types):
+        """BUG-08 复验补齐：前端 rich filters 多选统一发 `<key>__in`，
+        Parent type 关系筛选必须有 `parent__type_id__in` 形态"""
+        epic_parent = make_issue(project, "Epic parent in", type_obj=types["epic"])
+        task_parent = make_issue(project, "Task parent in", type_obj=types["task"])
+        child_of_epic = make_issue(project, "Child of epic in", type_obj=types["task"], parent=epic_parent)
+        child_of_task = make_issue(project, "Child of task in", type_obj=types["task"], parent=task_parent)
+
+        filtered = IssueFilterSet(
+            queryset=Issue.objects.filter(project_id=project.id),
+            data={"parent__type_id__in": str(types["epic"].id)},
+        ).qs
+        assert set(filtered.values_list("id", flat=True)) == {child_of_epic.id}
+
+        filtered_multi = IssueFilterSet(
+            queryset=Issue.objects.filter(project_id=project.id),
+            data={"parent__type_id__in": f"{types['epic'].id},{types['task'].id}"},
+        ).qs
+        assert set(filtered_multi.values_list("id", flat=True)) == {child_of_epic.id, child_of_task.id}
+
     def test_filter_via_work_items_api(self, session_client, project, types, mock_celery):
         """端到端：rich filters JSON 参数走 ComplexFilterBackend → IssueFilterSet
         （注意：issue 列表的 filterset 只经由 `filters` JSON 参数生效）"""
