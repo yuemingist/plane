@@ -3,12 +3,13 @@
 # See the LICENSE file for details.
 
 import copy
+from collections import defaultdict
 
 from django.db import models
 from django.db.models import Q
 from django_filters import FilterSet, filters
 
-from plane.db.models import Issue
+from plane.db.models import Issue, IssueProperty, IssuePropertyType
 
 
 class UUIDInFilter(filters.BaseInFilter, filters.UUIDFilter):
@@ -174,6 +175,12 @@ class IssueFilterSet(BaseFilterSet):
     project_id = filters.UUIDFilter(field_name="project_id")
     project_id__in = UUIDInFilter(field_name="project_id", lookup_expr="in")
 
+    # 自定义属性筛选（段 4 属性贯穿）：IssueComplexFilterBackend 已把
+    # `customproperty_<id>__<op>` 重写为这两个合成键，值编码 `<属性id>:<原值>`。
+    # 两个键在 preprocess 后均为列表（QueryDict setlist），故都用 CSV 形态的 CharInFilter 承接。
+    custom_property_values = CharInFilter(method="filter_custom_property_values")
+    custom_property_values__in = CharInFilter(method="filter_custom_property_values_in")
+
     subscriber_id = filters.UUIDFilter(method="filter_subscriber_id")
     subscriber_id__in = UUIDInFilter(method="filter_subscriber_id_in", lookup_expr="in")
 
@@ -299,8 +306,99 @@ class IssueFilterSet(BaseFilterSet):
         )
 
     def filter_subscriber_id_in(self, queryset, name, value):
-        """Filter by subscriber IDs (in), excluding soft deleted users"""
+        """Filter by assignee IDs (in), excluding soft deleted users"""
         return Q(
             issue_subscribers__subscriber_id__in=value,
             issue_subscribers__deleted_at__isnull=True,
         )
+
+    # ---------- 自定义属性筛选（段 4 属性贯穿） ----------
+
+    @staticmethod
+    def _coerce_custom_property_value(property_obj: IssueProperty, raw: str):
+        """按 property_type 规整前端送来的字符串值；不可规整时返回 None（该条件不命中）。"""
+        if property_obj.property_type == IssuePropertyType.BOOLEAN:
+            lowered = str(raw).strip().lower()
+            if lowered in ("true", "1", "yes"):
+                return True
+            if lowered in ("false", "0", "no"):
+                return False
+            return None
+        if property_obj.property_type == IssuePropertyType.DECIMAL:
+            try:
+                return float(raw)
+            except (TypeError, ValueError):
+                return None
+        # text / url / date / option id / member id：字符串原样匹配
+        return str(raw)
+
+    def _custom_property_match_q(self, property_id: str, raw_values) -> Q:
+        """单属性匹配 Q：值按属性类型规整后与 IssuePropertyValue 匹配。
+
+        - 多值容器（下拉/成员 is_multi）：`value__contains=[v]`（JSONB @>），组内 OR；
+        - 其余：`value__in=<规整值列表>`（组内 OR，即「任一命中」）；
+        - 属性不存在 / 非本项目池 / 已禁用：空匹配（不泄露任何行）。
+        """
+        property_obj = (
+            IssueProperty.objects.filter(
+                id=property_id,
+                is_active=True,
+                deleted_at__isnull=True,
+            ).first()
+            if property_id
+            else None
+        )
+        if property_obj is None:
+            return Q(pk__in=[])
+
+        coerced_values = [
+            coerced
+            for coerced in (self._coerce_custom_property_value(property_obj, raw) for raw in raw_values)
+            if coerced is not None
+        ]
+        if not coerced_values:
+            return Q(pk__in=[])
+
+        is_multi_container = property_obj.property_type in (
+            IssuePropertyType.OPTION,
+            IssuePropertyType.MEMBER,
+        ) and bool((property_obj.settings or {}).get("is_multi"))
+
+        value_q = Q()
+        if is_multi_container:
+            for coerced in coerced_values:
+                value_q |= Q(value__contains=[coerced])
+        else:
+            value_q = Q(value__in=coerced_values)
+
+        return (
+            Q(
+                issue_property_values__issue_property_id=property_obj.id,
+                issue_property_values__deleted_at__isnull=True,
+            )
+            & value_q
+        )
+
+    def _group_encoded_values(self, encoded_values) -> dict:
+        """把 `<属性id>:<原值>` 编码串按属性 id 分组（值内冒号由 split maxsplit=1 保留）。"""
+        grouped = defaultdict(list)
+        for encoded in encoded_values:
+            if not isinstance(encoded, str) or ":" not in encoded:
+                continue
+            property_id, raw = encoded.split(":", 1)
+            grouped[property_id].append(raw)
+        return grouped
+
+    def filter_custom_property_values(self, queryset, name, value):
+        """`custom_property_values`（单值条件列表）：组间 AND、组内 OR。"""
+        q = Q()
+        for property_id, raw_values in self._group_encoded_values(value).items():
+            q &= self._custom_property_match_q(property_id, raw_values)
+        return q
+
+    def filter_custom_property_values_in(self, queryset, name, value):
+        """`custom_property_values__in`（多值条件列表）：组间 AND、组内 OR（任一命中）。"""
+        q = Q()
+        for property_id, raw_values in self._group_encoded_values(value).items():
+            q &= self._custom_property_match_q(property_id, raw_values)
+        return q

@@ -62,7 +62,7 @@ from plane.db.models import (
     ProjectMember,
     UserRecentVisit,
 )
-from plane.utils.filters import ComplexFilterBackend, IssueFilterSet
+from plane.utils.filters import ComplexFilterBackend, IssueComplexFilterBackend, IssueFilterSet
 from plane.utils.global_paginator import paginate
 from plane.utils.grouper import (
     issue_group_values,
@@ -73,6 +73,7 @@ from plane.utils.host import base_host
 from plane.utils.serializers import writable_data
 from plane.utils.issue_filters import issue_filters
 from plane.utils.order_queryset import order_issue_queryset
+from plane.utils.property_values import attach_issue_property_values
 from plane.utils.paginator import GroupedOffsetPaginator, SubGroupedOffsetPaginator
 from plane.utils.timezone_converter import user_timezone_converter
 
@@ -80,7 +81,7 @@ from .. import BaseAPIView, BaseViewSet
 
 
 class IssueListEndpoint(BaseAPIView):
-    filter_backends = (ComplexFilterBackend,)
+    filter_backends = (IssueComplexFilterBackend,)
     filterset_class = IssueFilterSet
 
     @allow_permission([ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST])
@@ -174,34 +175,39 @@ class IssueListEndpoint(BaseAPIView):
         if self.fields or self.expand:
             issues = IssueSerializer(issue_queryset, many=True, fields=self.fields, expand=self.expand).data
         else:
-            issues = issue_queryset.values(
-                "id",
-                "name",
-                "state_id",
-                "sort_order",
-                "completed_at",
-                "estimate_point",
-                "priority",
-                "start_date",
-                "target_date",
-                "sequence_id",
-                "project_id",
-                "parent_id",
-                "type_id",
-                "cycle_id",
-                "module_ids",
-                "label_ids",
-                "assignee_ids",
-                "sub_issues_count",
-                "created_at",
-                "updated_at",
-                "created_by",
-                "updated_by",
-                "attachment_count",
-                "link_count",
-                "is_draft",
-                "archived_at",
-                "deleted_at",
+            issues = attach_issue_property_values(
+                list(
+                    issue_queryset.values(
+                        "id",
+                        "name",
+                        "state_id",
+                        "sort_order",
+                        "completed_at",
+                        "estimate_point",
+                        "priority",
+                        "start_date",
+                        "target_date",
+                        "sequence_id",
+                        "project_id",
+                        "parent_id",
+                        "type_id",
+                        "cycle_id",
+                        "module_ids",
+                        "label_ids",
+                        "assignee_ids",
+                        "sub_issues_count",
+                        "created_at",
+                        "updated_at",
+                        "created_by",
+                        "updated_by",
+                        "attachment_count",
+                        "link_count",
+                        "is_draft",
+                        "archived_at",
+                        "deleted_at",
+                    )
+                ),
+                project_id,
             )
             datetime_fields = ["created_at", "updated_at"]
             issues = user_timezone_converter(issues, datetime_fields, request.user.user_timezone)
@@ -212,7 +218,7 @@ class IssueViewSet(BaseViewSet):
     model = Issue
     webhook_event = "issue"
     search_fields = ["name"]
-    filter_backends = (ComplexFilterBackend,)
+    filter_backends = (IssueComplexFilterBackend,)
     filterset_class = IssueFilterSet
 
     def get_serializer_class(self):
@@ -323,6 +329,13 @@ class IssueViewSet(BaseViewSet):
             issue_queryset = issue_queryset.filter(created_by=request.user)
             filtered_issue_queryset = filtered_issue_queryset.filter(created_by=request.user)
 
+        # 段 4 属性贯穿：分页后批量补自定义属性值（每页恒定 +1 查询，段 4 技术方案 §1）
+        def issue_results_with_property_values(issues):
+            return attach_issue_property_values(
+                issue_on_results(group_by=group_by, issues=issues, sub_group_by=sub_group_by),
+                project_id,
+            )
+
         if group_by:
             if sub_group_by:
                 if group_by == sub_group_by:
@@ -338,9 +351,7 @@ class IssueViewSet(BaseViewSet):
                         order_by=order_by_param,
                         queryset=issue_queryset,
                         total_count_queryset=filtered_issue_queryset,
-                        on_results=lambda issues: issue_on_results(
-                            group_by=group_by, issues=issues, sub_group_by=sub_group_by
-                        ),
+                        on_results=issue_results_with_property_values,
                         paginator_cls=SubGroupedOffsetPaginator,
                         group_by_fields=issue_group_values(
                             field=group_by,
@@ -374,9 +385,7 @@ class IssueViewSet(BaseViewSet):
                     order_by=order_by_param,
                     queryset=issue_queryset,
                     total_count_queryset=filtered_issue_queryset,
-                    on_results=lambda issues: issue_on_results(
-                        group_by=group_by, issues=issues, sub_group_by=sub_group_by
-                    ),
+                    on_results=issue_results_with_property_values,
                     paginator_cls=GroupedOffsetPaginator,
                     group_by_fields=issue_group_values(
                         field=group_by,
@@ -401,7 +410,7 @@ class IssueViewSet(BaseViewSet):
                 request=request,
                 queryset=issue_queryset,
                 total_count_queryset=filtered_issue_queryset,
-                on_results=lambda issues: issue_on_results(group_by=group_by, issues=issues, sub_group_by=sub_group_by),
+                on_results=issue_results_with_property_values,
             )
 
     @allow_permission([ROLE.ADMIN, ROLE.MEMBER])
@@ -757,21 +766,11 @@ class ProjectUserDisplayPropertyEndpoint(BaseAPIView):
     @allow_permission([ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST])
     def patch(self, request, slug, project_id):
         try:
-            issue_property = ProjectUserProperty.objects.get(
-                user=request.user, 
-                project_id=project_id
-            )
+            issue_property = ProjectUserProperty.objects.get(user=request.user, project_id=project_id)
         except ProjectUserProperty.DoesNotExist:
-            issue_property = ProjectUserProperty.objects.create(
-                user=request.user, 
-                project_id=project_id
-            )
+            issue_property = ProjectUserProperty.objects.create(user=request.user, project_id=project_id)
 
-        serializer = ProjectUserPropertySerializer(
-            issue_property, 
-            data=request.data,
-            partial=True
-        )
+        serializer = ProjectUserPropertySerializer(issue_property, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
