@@ -243,3 +243,6 @@ from .timezone.base import TimezoneEndpoint
 # 工作项类型域与 Epic 域（Step01 追赶 BE-1/BE-2）
 from .issue_type import ProjectIssueTypeViewSet, WorkItemTypeViewSet
 from .epic.base import EpicSubIssuesEndpoint, EpicViewSet
+
+# 工作流域（Step02 段 1 追赶 BE）
+from .workflow import WorkflowViewSet

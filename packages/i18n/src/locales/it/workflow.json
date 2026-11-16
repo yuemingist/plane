@@ -1,5 +1,53 @@
 {
   "workflows": {
+    "settings": {
+      "label": "Workflows",
+      "description": "Workflows control how work items move between states — who can move them, and where they can move to.",
+      "enable": {
+        "title": "Enable workflows",
+        "description": "Enforce workflow rules in this project.",
+        "success_toast": {
+          "title": "Success!",
+          "message": "Workflow has been enabled successfully."
+        }
+      },
+      "table": {
+        "title": "Workflows",
+        "columns": {
+          "workflow": "Workflow",
+          "status": "Status",
+          "states": "States",
+          "work_item_types": "Work item types"
+        },
+        "states": {
+          "all": "All states"
+        },
+        "work_item_types": {
+          "all": "All work item types"
+        }
+      },
+      "row_menu": {
+        "disable": "Disable"
+      },
+      "disable": {
+        "confirmation": {
+          "title": "Are you sure you want to disable this workflow?",
+          "description": "If you disable this workflow, workflow rules will no longer be enforced for this project."
+        },
+        "success_toast": {
+          "title": "Success!",
+          "message": "Workflow has been disabled successfully."
+        }
+      },
+      "history": {
+        "empty": "No changes yet.",
+        "action": {
+          "enabled": "enabled the workflow",
+          "disabled": "disabled the workflow",
+          "re_enabled": "re-enabled the workflow"
+        }
+      }
+    },
     "workflow_states": {
       "work_item_creation": "Consenti nuovi elementi di lavoro",
       "work_item_creation_disable_tooltip": "La creazione di elementi di lavoro è disabilitata per questo stato",

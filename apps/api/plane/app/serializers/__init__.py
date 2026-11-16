@@ -138,3 +138,6 @@ from .draft import (
 
 # 工作项类型域（Step01 追赶 BE-1）
 from .issue_type import IssueTypeSerializer, ProjectIssueTypeSerializer
+
+# 工作流域（Step02 段 1 追赶 BE）
+from .workflow import WorkflowChangeLogSerializer, WorkflowSerializer
