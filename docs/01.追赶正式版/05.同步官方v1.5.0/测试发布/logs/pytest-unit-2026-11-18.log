@@ -1,0 +1,7 @@
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============== 749 passed, 988 deselected, 92 warnings in 45.75s ===============
+
+# 备注（子PM）：合并 v1.5.0 后首跑 42 failed（test_issue_type/states 两文件），
+# 根因=pytest.ini --reuse-db --nomigrations 下测试库 schema 为段 4 时代过期快照（缺 0129 M2M 表 project_issue_types_states）；
+# 处置=pytest --create-db 重建后 749 passed / 0 failed。非代码适配问题。pnpm check:types/lint/format 全绿（TS 适配仅 1 处 toSorted）。
