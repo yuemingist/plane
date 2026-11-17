@@ -69,10 +69,12 @@ export const TypeStatesSection = observer(function TypeStatesSection(props: TTyp
   }, [issueType?.id, issueType?.state_ids]);
 
   const projectStates = useMemo<IState[]>(() => {
-    return (projectStateIds ?? [])
+    // 非链式原地排序：oxlint fixer 会把链尾 .sort 改写为 .toSorted（ES2022 lib 无该类型，编译失败）
+    const states = (projectStateIds ?? [])
       .map((stateId) => getStateById(stateId))
-      .filter((state): state is IState => !!state)
-      .toSorted((a, b) => a.sequence - b.sequence);
+      .filter((state): state is IState => !!state);
+    states.sort((a, b) => a.sequence - b.sequence);
+    return states;
   }, [projectStateIds, getStateById]);
 
   const handleToggle = (stateId: string, checked: boolean) => {
